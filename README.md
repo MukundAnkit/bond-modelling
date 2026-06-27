@@ -54,7 +54,7 @@ src/
 
 ## Verification
 
-See `notebooks/verification_module1.ipynb` for textbook cross-checks.
+See `notebooks/01-single-instrument-pricing-verification.ipynb` for textbook cross-checks.
 
 ## License
 
