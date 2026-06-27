@@ -21,14 +21,22 @@
 ```
 bond_modelling/
 ├── pyproject.toml              # Project config & dependencies
+├── .editorconfig               # Editor consistency rules
 ├── .gitignore
 ├── .python-version
-├── README.md
+├── LICENSE                     # MIT license
+├── README.md                   # Project description & usage
 ├── uv.lock                     # Locked dependency tree
+├── .github/
+│   ├── workflows/
+│   │   └── ci.yml              # GitHub Actions — auto-run tests on push/PR
+│   └── pull_request_template.md
 ├── docs/
-│   └── project_plan.md         # MRD — full specification
+│   ├── project_plan.md         # MRD — full specification
+│   └── project_status.md       # This file — current state
 ├── src/
 │   ├── module1_pricing/        # Module 1 — COMPLETE
+│   │   ├── __init__.py
 │   │   ├── bond.py             #   Bond dataclass
 │   │   ├── pricing.py          #   Price calculator (PV of cash flows)
 │   │   └── ytm_solver.py       #   YTM solver (Newton + bisection)
@@ -38,7 +46,9 @@ bond_modelling/
 │   ├── data/                   # Data source fetchers — not started
 │   └── utils/                  # Shared helpers — empty
 ├── tests/
+│   ├── __init__.py
 │   ├── test_module1_pricing/   # Module 1 tests — 16 passing
+│   │   ├── __init__.py
 │   │   ├── test_pricing.py     #   9 tests
 │   │   └── test_ytm_solver.py  #   7 tests
 │   ├── test_module2_risk/      # empty (scaffold)
@@ -47,6 +57,18 @@ bond_modelling/
 └── notebooks/
     └── verification_module1.ipynb  # Textbook verification notebook
 ```
+
+---
+
+## Version Control
+
+| Item | Detail |
+|---|---|
+| Remote | `https://github.com/MukundAnkit/bond-modelling.git` |
+| Branches | `main` (empty), `dev` (active) |
+| Workflow | Feature branches (`feat/*`) → PR → `dev` → PR → `main` |
+| CI | GitHub Actions — runs `uv run pytest` on push/PR to `dev` or `main` |
+| PR template | Checklist with type tags + verification steps |
 
 ---
 
@@ -79,9 +101,11 @@ bond_modelling/
 - Tolerance: $10^{-6}$
 
 ### Test Results
+
 ```
 16 passed in 0.06s
 ```
+
 - Bond validation: creation, rejected invalid inputs (4 tests)
 - Pricing: par, premium, discount, zero-coupon (4 tests)
 - YTM solvers: Newton (par/premium/discount), bisection, combined solver, zero-coupon, not-bracketed error (7 tests)
@@ -91,6 +115,7 @@ bond_modelling/
 ## Next Steps
 
 Per the Execution Protocol in the MRD, development must proceed in order:
+
 1. ~~Module 1 (complete)~~
 2. **Module 2**: Duration & Convexity — implement Macaulay Duration, Modified Duration, Convexity, shock simulation
 3. Module 3: Bootstrapping
