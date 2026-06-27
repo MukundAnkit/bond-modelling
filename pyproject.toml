@@ -1,0 +1,25 @@
+[project]
+name = "bond-modelling"
+version = "0.1.0"
+description = "Progressive fixed-income pricing and risk engine"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.14",
+    "pandas>=2.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "jupyter>=1.0",
+    "pandas-datareader>=0.10",
+    "yfinance>=0.2",
+    "requests>=2.31",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

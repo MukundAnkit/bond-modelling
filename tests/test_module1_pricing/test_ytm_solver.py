@@ -1,0 +1,46 @@
+import pytest
+
+from src.module1_pricing.bond import Bond
+from src.module1_pricing.ytm_solver import ytm_newton, ytm_bisection, ytm_solver
+
+
+def test_ytm_newton_par():
+    b = Bond(face_value=100, coupon_rate=0.05, maturity=3.0, freq=2)
+    y = ytm_newton(b, 100.0)
+    assert y == pytest.approx(0.05, abs=1e-4)
+
+
+def test_ytm_newton_premium():
+    b = Bond(face_value=100, coupon_rate=0.05, maturity=3.0, freq=2)
+    y = ytm_newton(b, 102.80)
+    assert y == pytest.approx(0.04, abs=1e-2)
+
+
+def test_ytm_newton_discount():
+    b = Bond(face_value=100, coupon_rate=0.05, maturity=3.0, freq=2)
+    y = ytm_newton(b, 97.33)
+    assert y == pytest.approx(0.06, abs=1e-2)
+
+
+def test_ytm_bisection_par():
+    b = Bond(face_value=100, coupon_rate=0.05, maturity=3.0, freq=2)
+    y = ytm_bisection(b, 100.0)
+    assert y == pytest.approx(0.05, abs=1e-4)
+
+
+def test_ytm_solver_fallback():
+    b = Bond(face_value=100, coupon_rate=0.05, maturity=3.0, freq=2)
+    y = ytm_solver(b, 100.0)
+    assert y == pytest.approx(0.05, abs=1e-4)
+
+
+def test_ytm_zero_coupon():
+    b = Bond(face_value=100, coupon_rate=0.0, maturity=5.0, freq=1)
+    y = ytm_solver(b, 100 / (1.03**5))
+    assert y == pytest.approx(0.03, abs=1e-4)
+
+
+def test_ytm_bisection_not_bracketed():
+    b = Bond(face_value=100, coupon_rate=0.05, maturity=3.0, freq=2)
+    with pytest.raises(ValueError):
+        ytm_bisection(b, 200.0, lower=0.0, upper=0.01)
