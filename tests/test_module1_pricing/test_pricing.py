@@ -1,5 +1,4 @@
 import pytest
-import numpy as np
 
 from src.module1_pricing.bond import Bond
 from src.module1_pricing.pricing import price

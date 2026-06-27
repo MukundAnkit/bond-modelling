@@ -112,6 +112,9 @@ dev ──→ PR ──→ merge commit ──→ main (tagged)
 
 Before merging any PR:
 
+- [ ] Linting passes: `uv run ruff check .`
+- [ ] Format check passes: `uv run ruff format . --check`
+- [ ] Type check passes: `uv run mypy src/`
 - [ ] All tests pass: `uv run pytest`
 - [ ] New functionality has corresponding tests
 - [ ] If a module is completed, notebook verification has been run
@@ -140,8 +143,12 @@ Tags are created on `main` only.
 The GitHub Actions workflow (`.github/workflows/ci.yml`) automatically runs on every push and PR to `dev` or `main`:
 
 - **Environment**: Python 3.12, uv-managed
-- **Command**: `uv run pytest -v --tb=short`
-- **Expectation**: All tests must pass. A red CI blocks the merge.
+- **Commands**:
+  1. `ruff check .` — lint check
+  2. `ruff format . --check` — format check
+  3. `mypy src/` — type check
+  4. `pytest -v --tb=short` — test suite
+- **Expectation**: All four gates must pass. A red CI blocks the merge.
 
 ---
 
