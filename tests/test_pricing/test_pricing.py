@@ -1,7 +1,7 @@
 import pytest
 
-from src.module1_pricing.bond import Bond
-from src.module1_pricing.pricing import price
+from src.instruments.bond import Bond
+from src.instruments.pricing import price
 
 
 def test_bond_creation():

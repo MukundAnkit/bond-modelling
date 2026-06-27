@@ -1,7 +1,7 @@
 import pytest
 
-from src.module1_pricing.bond import Bond
-from src.module1_pricing.ytm_solver import ytm_bisection, ytm_newton, ytm_solver
+from src.instruments.bond import Bond
+from src.instruments.ytm_solver import ytm_bisection, ytm_newton, ytm_solver
 
 
 def test_ytm_newton_par():

@@ -23,9 +23,9 @@ source .venv/bin/activate
 ## Usage
 
 ```python
-from src.module1_pricing.bond import Bond
-from src.module1_pricing.pricing import price
-from src.module1_pricing.ytm_solver import ytm_solver
+from src.instruments.bond import Bond
+from src.instruments.pricing import price
+from src.instruments.ytm_solver import ytm_solver
 
 bond = Bond(face_value=100, coupon_rate=0.05, maturity=3.0, freq=2)
 p = price(bond, yield_rate=0.04)     # → ~102.80
@@ -44,10 +44,10 @@ uv run pytest --cov=src         # with coverage
 
 ```
 src/
-├── module1_pricing/   # Pricing & YTM (complete)
-├── module2_risk/      # Duration & Convexity
-├── module3_bootstrap/ # Bootstrapping
-├── module4_nelsonsiegel/ # Nelson-Siegel
+├── instruments/       # Bond instrument definitions & pricing
+├── risk/              # Duration & convexity
+├── bootstrap/         # Discrete term structure bootstrapping
+├── curve/             # Continuous yield curve (Nelson-Siegel)
 ├── data/              # Data source fetchers
 └── utils/             # Shared helpers
 ```

@@ -1,7 +1,7 @@
 """Yield-to-maturity solvers using Newton-Raphson and bisection methods."""
 
-from src.module1_pricing.bond import Bond
-from src.module1_pricing.pricing import price
+from src.instruments.bond import Bond
+from src.instruments.pricing import price
 
 TOLERANCE = 1e-6
 MAX_ITER = 500

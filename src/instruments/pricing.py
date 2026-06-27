@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from src.module1_pricing.bond import Bond
+from src.instruments.bond import Bond
 
 
 def price(bond: Bond, yield_rate: float) -> float:
