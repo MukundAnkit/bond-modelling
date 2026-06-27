@@ -32,8 +32,9 @@ bond_modelling/
 │   │   └── ci.yml              # GitHub Actions — auto-run tests on push/PR
 │   └── pull_request_template.md
 ├── docs/
-│   ├── project_plan.md         # MRD — full specification
-│   └── project_status.md       # This file — current state
+│   ├── project_plan.md            # MRD — full specification
+│   ├── project_status.md          # This file — current state
+│   └── development_workflow.md    # Branching, commits, PR practices
 ├── src/
 │   ├── module1_pricing/        # Module 1 — COMPLETE
 │   │   ├── __init__.py
@@ -69,6 +70,7 @@ bond_modelling/
 | Workflow | Feature branches (`feat/*`) → PR → `dev` → PR → `main` |
 | CI | GitHub Actions — runs `uv run pytest` on push/PR to `dev` or `main` |
 | PR template | Checklist with type tags + verification steps |
+| Workflow guide | See [`docs/development_workflow.md`](development_workflow.md) |
 
 ---
 
