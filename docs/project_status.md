@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-06-27 (v2 — added ruff/mypy tooling)
+> Last updated: 2026-06-27 (v0.1.0 — Module 1 complete, released to main)
 
 ---
 
@@ -66,11 +66,12 @@ bond_modelling/
 | Item | Detail |
 |---|---|
 | Remote | `https://github.com/MukundAnkit/bond-modelling.git` |
-| Branches | `main` (empty), `dev` (active) |
-| Workflow | Feature branches (`feat/*`) → PR → `dev` → PR → `main` |
+| Branches | `main` (`v0.1.0`), `dev` (active) |
+| Workflow | Feature branches (`feat/*`) → PR → `dev` → release PR → `main` (tagged) |
 | CI | GitHub Actions — runs `ruff check`, `ruff format --check`, `mypy src/`, `pytest` on push/PR to `dev` or `main` |
 | PR template | Checklist with type tags + verification steps |
 | Workflow guide | See [`docs/development_workflow.md`](development_workflow.md) |
+| Latest release | [`v0.1.0`](https://github.com/MukundAnkit/bond-modelling/releases/tag/v0.1.0) — Module 1: Single Instrument Pricing |
 
 ---
 
