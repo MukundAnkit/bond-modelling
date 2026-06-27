@@ -56,7 +56,7 @@ bond_modelling/
 │   ├── test_bootstrap/ # empty (scaffold)
 │   └── test_nelsonsiegel/ # empty (scaffold)
 └── notebooks/
-    └── verification_module1.ipynb  # Textbook verification notebook
+    └── 01-single-instrument-pricing-verification.ipynb  # Textbook verification notebook
 ```
 
 ---

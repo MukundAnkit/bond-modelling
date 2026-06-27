@@ -7,12 +7,12 @@ TOLERANCE = 1e-6
 MAX_ITER = 500
 
 
-def _price_diff(bond: Bond, target_price: float, y: float) -> float:
+def price_diff(bond: Bond, target_price: float, y: float) -> float:
     """Difference between price at yield ``y`` and the target price."""
     return price(bond, y) - target_price
 
 
-def _dv01_approx(bond: Bond, y: float, eps: float = 1e-6) -> float:
+def dv01_approx(bond: Bond, y: float, eps: float = 1e-6) -> float:
     """Numerical first derivative of price w.r.t. yield via central difference."""
     return (price(bond, y + eps) - price(bond, y - eps)) / (2 * eps)
 
@@ -46,7 +46,7 @@ def ytm_newton(bond: Bond, target_price: float, guess: float = 0.05) -> float:
         f = p - target_price
         if abs(f) < TOLERANCE:
             return y
-        derivative = _dv01_approx(bond, y)
+        derivative = dv01_approx(bond, y)
         if abs(derivative) < 1e-12:
             break
         y -= f / derivative
@@ -82,8 +82,8 @@ def ytm_bisection(
         If the method does not converge within MAX_ITER iterations.
 
     """
-    f_low = _price_diff(bond, target_price, lower)
-    f_high = _price_diff(bond, target_price, upper)
+    f_low = price_diff(bond, target_price, lower)
+    f_high = price_diff(bond, target_price, upper)
     if f_low * f_high > 0:
         raise ValueError(
             f"YTM not bracketed: price({lower})={f_low + target_price:.4f}, "
@@ -91,7 +91,7 @@ def ytm_bisection(
         )
     for _ in range(MAX_ITER):
         mid = (lower + upper) / 2
-        f_mid = _price_diff(bond, target_price, mid)
+        f_mid = price_diff(bond, target_price, mid)
         if abs(f_mid) < TOLERANCE:
             return mid
         if f_low * f_mid <= 0:
