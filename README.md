@@ -1,0 +1,61 @@
+# Bond Modelling
+
+Progressive fixed-income pricing and risk engine, built from the ground up across four modules:
+
+1. **Single Instrument Pricing** — Price & Yield-to-Maturity calculator
+2. **Risk Sensitivity** — Duration & Convexity
+3. **Discrete Term Structure** — Bootstrapping
+4. **Continuous Curve Optimization** — Nelson-Siegel
+
+## Setup
+
+```bash
+# Install uv (if not installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Sync environment
+uv sync --extra dev
+
+# Activate
+source .venv/bin/activate
+```
+
+## Usage
+
+```python
+from src.instruments.bond import Bond
+from src.instruments.pricing import price
+from src.instruments.ytm_solver import ytm_solver
+
+bond = Bond(face_value=100, coupon_rate=0.05, maturity=3.0, freq=2)
+p = price(bond, yield_rate=0.04)     # → ~102.80
+y = ytm_solver(bond, target_price=p) # → ~0.04
+```
+
+## Tests
+
+```bash
+uv run pytest                   # all tests
+uv run pytest -v                # verbose
+uv run pytest --cov=src         # with coverage
+```
+
+## Project Structure
+
+```
+src/
+├── instruments/       # Bond instrument definitions & pricing
+├── risk/              # Duration & convexity
+├── bootstrap/         # Discrete term structure bootstrapping
+├── curve/             # Continuous yield curve (Nelson-Siegel)
+├── data/              # Data source fetchers
+└── utils/             # Shared helpers
+```
+
+## Verification
+
+See `notebooks/01-single-instrument-pricing-verification.ipynb` for textbook cross-checks.
+
+## License
+
+MIT
