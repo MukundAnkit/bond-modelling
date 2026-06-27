@@ -23,7 +23,7 @@ The Human is the final authority and active guide in the development loop. Their
 
 The Agent works autonomously within the boundaries set by the Human. Their responsibilities are:
 - **Code Analysis**: Reading injected files and identifying architectural constraints before generating solutions.
-- **Plan Generation**: Outputting an implementation plan (`implementation_plan.md`) detailing intended changes and verifying it with the Human first.
+- **Plan Generation**: Outputting an implementation plan (`docs/implementation_plan.md`) detailing intended changes and verifying it with the Human first.
 - **Sandbox Execution & Verification**: Creating/modifying code and running linting (`ruff`), typing (`mypy`), and tests (`pytest`) inside the local terminal sandbox.
 - **Code/Implementation-Level Git Checkpointing**: Making incremental, logical git commits directly on the active feature branch (`feat/*`) when code builds and tests pass.
 - **Minimal Patching**: Touching the absolute minimum number of lines required. No opportunistic refactoring unless requested.
@@ -68,13 +68,14 @@ When starting a new module or feature, follow this flow:
 1. Agent implements business logic to pass tests.
 2. Agent runs `uv run pytest`, `ruff check .`, and `mypy .` to verify a clean build.
 3. Agent commits passing, well-formatted code to the local feature branch as an implementation checkpoint.
-4. Agent writes a `walkthrough.md` summarizing changes and test runs.
+4. Agent writes a `docs/walkthrough.md` summarizing changes and test runs.
 
 **Phase D: Review & Git Checkpoint (Human)**
 1. Human reviews the walkthrough, the diff, and the implementation-level commits on the feature branch.
 2. Human runs final local checks if desired.
-3. Human performs the final feature-level checkpointing (squash-merging the feature branch into `dev`).
-4. Human flushes the context window and opens a new session for the next feature.
+3. Human removes feature-specific artifacts (`docs/implementation_plan.md`, `docs/walkthrough.md`) from the feature branch (`git rm docs/implementation_plan.md docs/walkthrough.md && git commit -m "chore: clean up feature artifacts"`).
+4. Human performs the final feature-level checkpointing (squash-merging the feature branch into `dev`).
+5. Human flushes the context window and opens a new session for the next feature.
 
 5. Human-Agent Interaction & Token Hygiene Protocols
 
