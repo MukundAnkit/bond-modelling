@@ -1,1 +1,0 @@
-"""Discrete term structure — bootstrapping."""
