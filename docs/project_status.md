@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-06-28 (v0.3.0 — Module 4: Curve optimization complete)
+> Last updated: 2026-06-28 (v0.4.0 — Module 5: Portfolio engine & Caching complete)
 
 ---
 
@@ -57,8 +57,14 @@ bond_modelling/
 │   ├── curve/          # Nelson-Siegel curve — COMPLETE
 │   │   ├── __init__.py
 │   │   └── nelson_siegel.py    #   Nelson-Siegel curve model & optimizer
-│   ├── data/                   # Data source fetchers — not started
-│   └── utils/                  # Shared helpers — plotting.py added
+│   ├── data/                   # Data source fetchers — in progress
+│   │   ├── __init__.py
+│   │   └── validation.py       #   Crossover yield curve validation helper
+│   ├── portfolio/      # Portfolio aggregation — COMPLETE
+│   │   ├── __init__.py
+│   │   ├── portfolio.py        #   Portfolio aggregate risk & Basel stress
+│   │   └── position.py         #   Bond holdings position class
+│   └── utils/                  # Shared helpers — plotting.py, cache.py added
 ├── tests/
 │   ├── __init__.py
 │   ├── test_pricing/   # Pricing tests — 16 passing
@@ -81,14 +87,23 @@ bond_modelling/
 │   │   ├── __init__.py
 │   │   ├── test_bootstrap.py      #  18 tests
 │   │   └── test_interpolate.py    #   8 tests
-│   └── test_nelsonsiegel/ # Nelson-Siegel tests — 8 passing
+│   ├── test_data/      # Data tests — 3 passing
+│   │   └── test_validation.py     #   3 tests
+│   ├── test_nelsonsiegel/ # Nelson-Siegel tests — 8 passing
+│   │   ├── __init__.py
+│   │   └── test_nelson_siegel.py  #   8 tests
+│   ├── test_portfolio/ # Portfolio tests — 4 passing
+│   │   └── test_portfolio.py      #   4 tests
+│   └── test_utils/     # Utils tests — 21 passing
 │       ├── __init__.py
-│       └── test_nelson_siegel.py  #   8 tests
+│       ├── test_cache.py          #   3 tests
+│       └── test_plotting.py       #  18 tests
 └── notebooks/
     ├── 01-single-instrument-pricing-verification.ipynb  # Textbook verification notebook
     ├── 02-risk-sensitivity-verification.ipynb           # Duration & convexity notebook
     ├── 03-bootstrapping-verification.ipynb               # Bootstrapping verification notebook
-    └── 04-nelson-siegel-verification.ipynb              # Nelson-Siegel verification notebook
+    ├── 04-nelson-siegel-verification.ipynb              # Nelson-Siegel verification notebook
+    └── 05-portfolio-caching-verification.ipynb          # Portfolio & Caching verification notebook
 ```
 
 ---
@@ -117,6 +132,8 @@ bond_modelling/
 | Risk (Sensitivity) | **Complete** | Macaulay/Modified Duration, Convexity, Taylor-series shock, Dollar Duration/DV01, Effective D/C, Key Rate Duration, Basel IRBB stress scenarios. |
 | Bootstrap (Term Structure) | **Complete** | Recursive bootstrapping (annual + semi-annual), log-linear discount-factor interpolation. 26 tests. |
 | Curve (Optimization) | **Complete** | Nelson-Siegel continuous parametric curve optimization via multi-start Nelder-Mead. 8 tests. |
+| Portfolio (Aggregation) | **Complete** | Position and Portfolio classes, MV-weighted duration/convexity, DV01, KRD vectors, and Basel stress testing. 4 tests. |
+| Caching & Validation | **Complete** | JSONCache with TTL validation, cross_validate_yields comparing FRED vs yfinance. 6 tests. |
 
 ---
 
@@ -196,19 +213,47 @@ bond_modelling/
 
 ---
 
+## Portfolio — Implementation Details
+
+### `Position` (`src/portfolio/position.py`)
+- Holds a single bond instrument and transaction quantity.
+- Computes position-level market value, Modified Duration, Convexity, and DV01.
+
+### `Portfolio` (`src/portfolio/portfolio.py`)
+- Groups bond positions.
+- Computes MV-weighted Modified Duration, Convexity, and KRD vectors.
+- Computes aggregate DV01.
+- Runs portfolio-level stress P&L under Basel IRBB standardized scenarios.
+
+---
+
+## Caching & Validation — Implementation Details
+
+### `JSONCache` (`src/utils/cache.py`)
+- File-based cache using MD5 hashes for key-to-file path mapping.
+- Enforces TTL checks and automatic deletion of expired cache records.
+
+### `cross_validate_yields` (`src/data/validation.py`)
+- Automatic decimal scaling alignment of percentage (FRED) and CBOE 10x scaled (Yahoo Finance) yield arrays.
+- Checks and reports basis point discrepancies above a custom threshold.
+
+---
+
 ## Test Results
 
 ```
-130 passed in 0.77s
+140 passed in 1.94s
 ```
 
 | Test suite | Tests | Key coverage |
 |---|---|---|
 | `test_pricing` | 16 | Bond validation, pricing (par/premium/discount/zero), YTM solvers |
-| `test_utils` | 18 | Plotting config, figure creation, price-yield curves |
+| `test_data` | 3 | Crossover yield curve validation, decimal alignment, tolerance bounds |
+| `test_utils` | 21 | Plotting configurations, price-yield curves, JSONCache get/set/TTL/clear |
 | `test_risk` | 62 | Duration, convexity, shock, dollar measures, effective D/C, key rate duration, stress |
 | `test_bootstrap` | 26 | Annual/semi-annual bootstrapping, interpolation, error handling |
 | `test_nelsonsiegel` | 8 | Evaluation (scalar/vector), limits at t=0, SSE, heuristic/parameter-recovery fit, bound enforcement |
+| `test_portfolio` | 4 | Position/portfolio MV, weighted duration, weighted convexity, aggregate DV01, KRD aggregation, stress PnL |
 
 ---
 
