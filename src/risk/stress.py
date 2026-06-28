@@ -41,16 +41,12 @@ def _flattener(key_rates: list[float]) -> NDArray[np.float64]:
 
 def _short_rate_up(key_rates: list[float]) -> NDArray[np.float64]:
     r"""Short end +300 bp decaying linearly to 0 at 20 years."""
-    return np.array(
-        [0.03 * max(0.0, 1.0 - kr / 20.0) for kr in key_rates]
-    )
+    return np.array([0.03 * max(0.0, 1.0 - kr / 20.0) for kr in key_rates])
 
 
 def _short_rate_down(key_rates: list[float]) -> NDArray[np.float64]:
     r"""Short end −300 bp decaying linearly to 0 at 20 years."""
-    return np.array(
-        [-0.03 * max(0.0, 1.0 - kr / 20.0) for kr in key_rates]
-    )
+    return np.array([-0.03 * max(0.0, 1.0 - kr / 20.0) for kr in key_rates])
 
 
 # ---------------------------------------------------------------------------
@@ -168,8 +164,11 @@ def irbb_stress_scenarios(
 
     """
     if key_rates is None:
-        key_rates = [kr for kr in [0.5, 1.0, 2.0, 3.0, 5.0, 7.0, 10.0, 20.0, 30.0]
-                     if kr <= bond.maturity]
+        key_rates = [
+            kr
+            for kr in [0.5, 1.0, 2.0, 3.0, 5.0, 7.0, 10.0, 20.0, 30.0]
+            if kr <= bond.maturity
+        ]
 
     p0 = price(bond, yield_rate)
     results: dict[str, dict[str, float]] = {}

@@ -10,9 +10,7 @@ from src.instruments.bond import Bond
 from src.instruments.pricing import price
 
 
-def effective_duration(
-    bond: Bond, yield_rate: float, bump: float = 1e-4
-) -> float:
+def effective_duration(bond: Bond, yield_rate: float, bump: float = 1e-4) -> float:
     r"""Calculate the Effective Duration of a bond.
 
     Effective Duration measures the approximate percentage price sensitivity
@@ -41,9 +39,7 @@ def effective_duration(
     return (p_down - p_up) / (2.0 * bump * p0)
 
 
-def effective_convexity(
-    bond: Bond, yield_rate: float, bump: float = 1e-4
-) -> float:
+def effective_convexity(bond: Bond, yield_rate: float, bump: float = 1e-4) -> float:
     r"""Calculate the Effective Convexity of a bond.
 
     Effective Convexity measures the curvature of the price-yield relationship

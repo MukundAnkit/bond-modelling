@@ -76,14 +76,12 @@ def key_rate_durations(
                 for j in range(len(key_rates) - 1):
                     if key_rates[j] <= t <= key_rates[j + 1]:
                         if kr == key_rates[j]:
-                            weights[i] = (
-                                (key_rates[j + 1] - t)
-                                / (key_rates[j + 1] - key_rates[j])
+                            weights[i] = (key_rates[j + 1] - t) / (
+                                key_rates[j + 1] - key_rates[j]
                             )
                         elif kr == key_rates[j + 1]:
-                            weights[i] = (
-                                (t - key_rates[j])
-                                / (key_rates[j + 1] - key_rates[j])
+                            weights[i] = (t - key_rates[j]) / (
+                                key_rates[j + 1] - key_rates[j]
                             )
                         break
 
