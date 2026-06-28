@@ -49,7 +49,7 @@ ignore = ["D203", "D213"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D100", "D101", "D102", "D103", "D104"]
-"*.ipynb" = ["E501", "D100", "D101", "D102", "D103", "D104", "D401", "D205", "D209", "B905", "F541"]
+"*.ipynb" = ["E501", "F541", "F811", "I001", "D100", "D101", "D102", "D103", "D104", "D401", "D205", "D209", "B905"]
 
 [tool.ruff.format]
 quote-style = "double"
