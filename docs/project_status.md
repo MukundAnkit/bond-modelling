@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-06-28 (v0.2.0 — Module 3: Bootstrap complete)
+> Last updated: 2026-06-28 (v0.3.0 — Module 4: Curve optimization complete)
 
 ---
 
@@ -54,7 +54,9 @@ bond_modelling/
 │   │   ├── __init__.py
 │   │   ├── bootstrap.py        #   Recursive spot-rate bootstrapping
 │   │   └── interpolate.py      #   Log-linear discount-factor interpolation
-│   ├── curve/   # Nelson-Siegel curve — not started
+│   ├── curve/          # Nelson-Siegel curve — COMPLETE
+│   │   ├── __init__.py
+│   │   └── nelson_siegel.py    #   Nelson-Siegel curve model & optimizer
 │   ├── data/                   # Data source fetchers — not started
 │   └── utils/                  # Shared helpers — plotting.py added
 ├── tests/
@@ -79,7 +81,9 @@ bond_modelling/
 │   │   ├── __init__.py
 │   │   ├── test_bootstrap.py      #  18 tests
 │   │   └── test_interpolate.py    #   8 tests
-│   └── test_nelsonsiegel/ # scaffold (empty)
+│   └── test_nelsonsiegel/ # Nelson-Siegel tests — 8 passing
+│       ├── __init__.py
+│       └── test_nelson_siegel.py  #   8 tests
 └── notebooks/
     ├── 01-single-instrument-pricing-verification.ipynb  # Textbook verification notebook
     ├── 02-risk-sensitivity-verification.ipynb           # Duration & convexity notebook
@@ -111,7 +115,7 @@ bond_modelling/
 | Utils (Plotting) | **Complete** | `set_theme()`, `BOND_COLORS`, `FigureConfig`, `figure()`, `subplots()`, `finish_plot()`, `reference_line()`, `price_yield_curve()`. |
 | Risk (Sensitivity) | **Complete** | Macaulay/Modified Duration, Convexity, Taylor-series shock, Dollar Duration/DV01, Effective D/C, Key Rate Duration, Basel IRBB stress scenarios. |
 | Bootstrap (Term Structure) | **Complete** | Recursive bootstrapping (annual + semi-annual), log-linear discount-factor interpolation. 26 tests. |
-| Curve (Optimization) | **Next →** | Nelson-Siegel — scaffold ready |
+| Curve (Optimization) | **Complete** | Nelson-Siegel continuous parametric curve optimization via multi-start Nelder-Mead. 8 tests. |
 
 ---
 
@@ -181,10 +185,20 @@ bond_modelling/
 
 ---
 
+## Curve — Implementation Details
+
+### `NelsonSiegelCurve` (`src/curve/nelson_siegel.py`)
+- Properties & aliases: `beta0`, `beta1`, `beta2`, `tau` (and aliases `level`, `slope`, `curvature`, `decay`)
+- Evaluation: `yield_rate(t)` and `__call__(t)` with support for scalar/vector inputs and limit calculation at $t \to 0$
+- SSE calculation: `sse(maturities, spot_rates)`
+- Optimization: `fit(maturities, spot_rates)` runs multi-start Nelder-Mead on candidate $\tau$ initial values `[0.5, 1.0, 2.0, 5.0, 10.0]` to guarantee convergence, with bound enforcement ($\beta_0 \ge 10^{-6}$, $\tau \ge 10^{-6}$)
+
+---
+
 ## Test Results
 
 ```
-122 passed in 0.43s
+130 passed in 0.77s
 ```
 
 | Test suite | Tests | Key coverage |
@@ -193,6 +207,7 @@ bond_modelling/
 | `test_utils` | 18 | Plotting config, figure creation, price-yield curves |
 | `test_risk` | 62 | Duration, convexity, shock, dollar measures, effective D/C, key rate duration, stress |
 | `test_bootstrap` | 26 | Annual/semi-annual bootstrapping, interpolation, error handling |
+| `test_nelsonsiegel` | 8 | Evaluation (scalar/vector), limits at t=0, SSE, heuristic/parameter-recovery fit, bound enforcement |
 
 ---
 
@@ -203,6 +218,6 @@ Per the Execution Protocol in the MRD, development must proceed in order:
 1. ~~Instruments (Pricing & YTM — complete)~~
 2. ~~Risk (Sensitivity — complete)~~
 3. ~~Bootstrap (Term Structure — complete)~~
-4. **Curve**: Nelson-Siegel — continuous curve optimization
+4. ~~Curve (Continuous Optimization — complete)~~
 
-Each module must be back-tested against established financial calculators before the next begins.
+Next Steps: Data Source Fetchers (FRED, Yahoo Finance, FINRA) integration and pipeline setup.
