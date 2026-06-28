@@ -71,6 +71,9 @@ When starting a new module or feature, follow this flow:
 4. Agent writes a `docs/walkthrough.md` summarizing changes and test runs.
 
 **Phase D: Review & Git Checkpoint (Human)**
+
+> **Agent Handoff Rule**: When Phase D is reached, the Agent MUST list the remaining steps and explicitly ask the Human which steps to delegate and which the Human will execute. The Agent MUST NOT perform squash-merges, branch deletions/deletion commands, or pushes to `dev`/`main` without explicit step-by-step Human authorization for each operation.
+
 1. Human reviews the walkthrough, the diff, and the implementation-level commits on the feature branch.
 2. Human runs final local checks if desired.
 3. Human removes feature-specific artifacts (`docs/implementation_plan.md`, `docs/walkthrough.md`) from the feature branch (`git rm docs/implementation_plan.md docs/walkthrough.md && git commit -m "chore: clean up feature artifacts"`).
