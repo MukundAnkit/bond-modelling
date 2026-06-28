@@ -87,7 +87,8 @@ bond_modelling/
 └── notebooks/
     ├── 01-single-instrument-pricing-verification.ipynb  # Textbook verification notebook
     ├── 02-risk-sensitivity-verification.ipynb           # Duration & convexity notebook
-    └── 03-bootstrapping-verification.ipynb               # Bootstrapping verification notebook
+    ├── 03-bootstrapping-verification.ipynb               # Bootstrapping verification notebook
+    └── 04-nelson-siegel-verification.ipynb              # Nelson-Siegel verification notebook
 ```
 
 ---
