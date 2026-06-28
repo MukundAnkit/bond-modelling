@@ -3,6 +3,7 @@
 import numpy as np
 
 from src.instruments.bond import Bond
+from src.utils.cashflows import generate_cashflows
 
 
 def price(bond: Bond, yield_rate: float) -> float:
@@ -22,7 +23,8 @@ def price(bond: Bond, yield_rate: float) -> float:
 
     """
     rate_per_period = yield_rate / bond.freq
-    t = np.arange(1, bond.periods + 1)
-    pv_coupons = np.sum(bond.coupon_payment / (1 + rate_per_period) ** t)
-    pv_face = bond.face_value / (1 + rate_per_period) ** bond.periods
-    return float(pv_coupons + pv_face)
+    t, cf = generate_cashflows(bond)
+
+    # Calculate present value
+    pv = np.sum(cf / (1 + rate_per_period) ** t)
+    return float(pv)

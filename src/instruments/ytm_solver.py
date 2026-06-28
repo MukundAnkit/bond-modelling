@@ -1,20 +1,8 @@
-"""Yield-to-maturity solvers using Newton-Raphson and bisection methods."""
+"""Yield-to-maturity solvers using generic numerical methods."""
 
 from src.instruments.bond import Bond
 from src.instruments.pricing import price
-
-TOLERANCE = 1e-6
-MAX_ITER = 500
-
-
-def price_diff(bond: Bond, target_price: float, y: float) -> float:
-    """Difference between price at yield ``y`` and the target price."""
-    return price(bond, y) - target_price
-
-
-def dv01_approx(bond: Bond, y: float, eps: float = 1e-6) -> float:
-    """Numerical first derivative of price w.r.t. yield via central difference."""
-    return (price(bond, y + eps) - price(bond, y - eps)) / (2 * eps)
+from src.utils.math import bisection, newton_raphson
 
 
 def ytm_newton(bond: Bond, target_price: float, guess: float = 0.05) -> float:
@@ -37,20 +25,14 @@ def ytm_newton(bond: Bond, target_price: float, guess: float = 0.05) -> float:
     Raises
     ------
     RuntimeError
-        If the method does not converge within MAX_ITER iterations.
+        If the method does not converge.
 
     """
-    y = guess
-    for _ in range(MAX_ITER):
-        p = price(bond, y)
-        f = p - target_price
-        if abs(f) < TOLERANCE:
-            return y
-        derivative = dv01_approx(bond, y)
-        if abs(derivative) < 1e-12:
-            break
-        y -= f / derivative
-    raise RuntimeError("Newton-Raphson did not converge")
+
+    def f(y: float) -> float:
+        return price(bond, y) - target_price
+
+    return newton_raphson(f, guess=guess)
 
 
 def ytm_bisection(
@@ -79,28 +61,14 @@ def ytm_bisection(
     ValueError
         If the target price is not bracketed by the given bounds.
     RuntimeError
-        If the method does not converge within MAX_ITER iterations.
+        If the method does not converge.
 
     """
-    f_low = price_diff(bond, target_price, lower)
-    f_high = price_diff(bond, target_price, upper)
-    if f_low * f_high > 0:
-        raise ValueError(
-            f"YTM not bracketed: price({lower})={f_low + target_price:.4f}, "
-            f"price({upper})={f_high + target_price:.4f}, target={target_price:.4f}"
-        )
-    for _ in range(MAX_ITER):
-        mid = (lower + upper) / 2
-        f_mid = price_diff(bond, target_price, mid)
-        if abs(f_mid) < TOLERANCE:
-            return mid
-        if f_low * f_mid <= 0:
-            upper = mid
-            f_high = f_mid
-        else:
-            lower = mid
-            f_low = f_mid
-    raise RuntimeError("Bisection did not converge")
+
+    def f(y: float) -> float:
+        return price(bond, y) - target_price
+
+    return bisection(f, lower=lower, upper=upper)
 
 
 def ytm_solver(

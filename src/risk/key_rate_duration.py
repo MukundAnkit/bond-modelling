@@ -4,6 +4,7 @@ import numpy as np
 
 from src.instruments.bond import Bond
 from src.instruments.pricing import price
+from src.utils.cashflows import generate_cashflows
 
 
 def key_rate_durations(
@@ -49,11 +50,9 @@ def key_rate_durations(
     p0 = price(bond, yield_rate)
     m = bond.freq
     n = bond.periods
-    t_years = np.arange(1, n + 1) / m  # cash flow times in years
 
-    # Build cash flow vector
-    cf = np.full(n, bond.coupon_payment)
-    cf[-1] += bond.face_value
+    t, cf = generate_cashflows(bond)
+    t_years = t / m  # cash flow times in years
 
     results: dict[float, float] = {}
 

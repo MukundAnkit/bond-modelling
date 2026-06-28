@@ -4,6 +4,7 @@ import numpy as np
 
 from src.instruments.bond import Bond
 from src.instruments.pricing import price
+from src.utils.cashflows import generate_cashflows
 
 
 def convexity(bond: Bond, yield_rate: float) -> float:
@@ -28,10 +29,8 @@ def convexity(bond: Bond, yield_rate: float) -> float:
     p = price(bond, yield_rate)
     rate_per_period = yield_rate / bond.freq
     m = bond.freq
-    t = np.arange(1, bond.periods + 1)
-    cash_flows = np.full(bond.periods, bond.coupon_payment)
-    cash_flows[-1] += bond.face_value
+    t, cf = generate_cashflows(bond)
     weighted_pv = np.sum(
-        t * (t + 1.0) / (m * m) * cash_flows / (1 + rate_per_period) ** (t + 2)
+        t * (t + 1.0) / (m * m) * cf / (1 + rate_per_period) ** (t + 2)
     )
     return float(weighted_pv / p)
