@@ -1,64 +1,54 @@
-# Walkthrough — Module 2: Risk & Sensitivity
-
-**Branch**: `feat/risk-duration-convexity`  
-**Commit**: `b26c697`
+# Walkthrough: Module 3 — Discrete Term Structure (Bootstrapping)
 
 ## Summary
 
-Implemented Macaulay Duration, Modified Duration, Convexity, interest-rate shock simulation, Effective Duration/Convexity, and Basel IRBB stress scenarios for fixed-rate bonds.
+Implemented the bootstrapping engine that extracts zero-coupon spot rates
+from a par yield curve. This is the discrete input needed by Module 4
+(Nelson-Siegel continuous curve optimization).
 
-### Source Files
+## Files Changed
 
-| File | Exports | Description |
-|------|---------|-------------|
-| `src/risk/duration.py` | `macaulay_duration`, `modified_duration` | Weighted-average time to cash flows; first-derivative sensitivity |
-| `src/risk/convexity.py` | `convexity` | Second-derivative curvature measure |
-| `src/risk/shock.py` | `price_shock`, `shocked_price` | Taylor expansion: ΔP ≈ -ModD·P·Δy + ½·Cx·P·(Δy)² |
-| `src/risk/effective.py` | `effective_duration`, `effective_convexity` | Central-difference numerical duration/convexity for bonds with embedded options |
-| `src/risk/stress.py` | `irbb_stress_scenarios`, `irbb_shock_vector` | Basel IRBB 6-scenario EVE stress framework (parallel ±100bp, steepener, flattener, short rate ±300bp) |
+| File | Action | Purpose |
+|---|---|---|
+| `src/bootstrap/bootstrap.py` | **Created** | Core recursive algorithm |
+| `src/bootstrap/interpolate.py` | **Created** | Log-linear discount-factor interpolation |
+| `src/bootstrap/__init__.py` | Modified | Public API export |
+| `tests/test_bootstrap/test_bootstrap.py` | **Created** | 18 tests for spot-rate extraction |
+| `tests/test_bootstrap/test_interpolate.py` | **Created** | 8 tests for interpolation |
+| `notebooks/03-bootstrapping-verification.ipynb` | **Created** | Textbook verification notebook |
+| `docs/implementation_plan.md` | **Created** | Plan document |
+| `docs/project_status.md` | Modified | Updated status |
 
-### Test Files
-
-| File | Tests |
-|------|-------|
-| `tests/test_risk/test_duration.py` | 13 tests |
-| `tests/test_risk/test_convexity.py` | 9 tests |
-| `tests/test_risk/test_shock.py` | 10 tests |
-| `tests/test_risk/test_effective.py` | 8 tests |
-| `tests/test_risk/test_stress.py` | 9 tests |
-
-**Total new tests**: 49 (15 added this session)
-
-### Key Test Coverage
-
-- **Mathematical cross-checks**: ZCB Macaulay Duration = maturity (annual + semi-annual); ZCB Modified Duration = T/(1+y); ZCB convexity closed-form verification
-- **Numerical differentiation**: Modified Duration and Convexity verified against central difference approximations
-- **Relationships**: Higher coupon → lower duration/convexity; longer maturity → higher duration/convexity; ModD = MacD / (1 + y/m)
-- **Edge cases**: yield = 0, negative yields, single-period bonds, zero-coupon bonds
-- **Shock simulation**: Δy = 0 → ΔP = 0; sign correctness; asymmetric gain/loss due to convexity; 1bp Taylor ≈ exact repricing; 100bp error < 0.5%
-- **Effective measures**: effective duration converges to modified duration within 1e-5 for vanilla bonds; effective convexity matches analytical convexity; small-bump reduces numerical error; correct handling of zero and negative yields
-- **Stress scenarios**: all 6 Basel scenarios returned; correct P&L sign (parallel up → loss, parallel down → gain); exact repricing match for parallel shocks via `shocked_price`; steepener penalises long bonds more than short; flattener has opposite effect; short-rate symmetric for par bonds
-
-### Verification Results
+## Test Results
 
 ```
-pytest: 96 passed (49 new + 47 existing) — no regressions
-ruff:   clean
-mypy:   Success: no issues found in 18 source files
+122 passed in 0.43s
 ```
 
-### API Surface
+Breakdown:
+- test_bootstrap: 18 tests (annual flat/sloping, error handling, semi-annual)
+- test_interpolate: 8 tests (exact match, between points, forward-fill)
+- + 96 existing tests from Modules 1-2
 
-```python
-def macaulay_duration(bond: Bond, yield_rate: float) -> float
-def modified_duration(bond: Bond, yield_rate: float) -> float
-def convexity(bond: Bond, yield_rate: float) -> float
-def price_shock(bond: Bond, yield_rate: float, delta_y: float) -> float
-def shocked_price(bond: Bond, yield_rate: float, delta_y: float) -> float
-def effective_duration(bond: Bond, yield_rate: float, bump: float = 0.0001) -> float
-def effective_convexity(bond: Bond, yield_rate: float, bump: float = 0.0001) -> float
-def irbb_shock_vector(scenario: str, tenors: NDArray[np.float64]) -> NDArray[np.float64]
-def irbb_stress_scenarios(bond: Bond, yield_rate: float) -> dict[str, dict[str, float]]
+## Lint & Type Check
+
+```
+ruff check .       → All checks passed!
+ruff format --check → 40 files already formatted
+mypy src/          → Success: no issues found
 ```
 
-All functions use NumPy-vectorized cash-flow summation for numerical stability and accept any valid `Bond` instance.
+## Verification Notebook
+
+`notebooks/03-bootstrapping-verification.ipynb` includes:
+- Textbook 5Y upward-sloping curve bootstrapping
+- Re-pricing verification: all par bonds reprice to 100 using the spot curve
+- Semi-annual curve comparison
+- Flat curve validation
+- Visual comparison: par yields vs. annual spot vs. semi-annual spot
+
+## Commit
+
+```
+9da0f7c feat: add Module 3 bootstrap spot-rate extraction
+```
