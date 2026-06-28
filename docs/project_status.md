@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-06-27 (v0.1.0 — Module 1 complete, released to main)
+> Last updated: 2026-06-28 (v0.1.1 — Plotting utils added, Module 1 refined)
 
 ---
 
@@ -41,20 +41,23 @@ bond_modelling/
 │   │   ├── bond.py             #   Bond dataclass
 │   │   ├── pricing.py          #   Price calculator (PV of cash flows)
 │   │   └── ytm_solver.py       #   YTM solver (Newton + bisection)
-│   ├── risk/           # Duration & Convexity — not started
+│   ├── risk/           # Duration & Convexity — scaffold (empty __init__.py)
 │   ├── bootstrap/      # Bootstrapping — not started
 │   ├── curve/   # Nelson-Siegel curve — not started
 │   ├── data/                   # Data source fetchers — not started
-│   └── utils/                  # Shared helpers — empty
+│   └── utils/                  # Shared helpers — plotting.py added
 ├── tests/
 │   ├── __init__.py
 │   ├── test_pricing/   # Pricing tests — 16 passing
 │   │   ├── __init__.py
 │   │   ├── test_pricing.py     #   9 tests
 │   │   └── test_ytm_solver.py  #   7 tests
-│   ├── test_risk/      # empty (scaffold)
-│   ├── test_bootstrap/ # empty (scaffold)
-│   └── test_nelsonsiegel/ # empty (scaffold)
+│   ├── test_utils/     # Utils tests — 18 passing
+│   │   ├── __init__.py
+│   │   └── test_plotting.py    #  18 tests
+│   ├── test_risk/      # scaffold (empty)
+│   ├── test_bootstrap/ # scaffold (empty)
+│   └── test_nelsonsiegel/ # scaffold (empty)
 └── notebooks/
     └── 01-single-instrument-pricing-verification.ipynb  # Textbook verification notebook
 ```
@@ -78,9 +81,10 @@ bond_modelling/
 ## Module Progress
 
 | Module | Status | Details |
-|---|---|---|
+|---|---|---|---|
 | Instruments (Pricing & YTM) | **Complete** | Bond dataclass, price(), YTM solver with Newton-Raphson + bisection fallback. Tolerance $10^{-6}$. Verified via 16 passing tests. |
-| Risk (Sensitivity) | Not started | Duration & Convexity |
+| Utils (Plotting) | **Complete** | `set_theme()`, `BOND_COLORS`, `FigureConfig`, `figure()`, `subplots()`, `finish_plot()`, `reference_line()`, `price_yield_curve()`. 18 tests. |
+| Risk (Sensitivity) | **Next →** | Duration & Convexity — scaffold ready |
 | Bootstrap (Term Structure) | Not started | Bootstrapping |
 | Curve (Optimization) | Not started | Nelson-Siegel |
 
