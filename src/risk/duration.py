@@ -4,6 +4,7 @@ import numpy as np
 
 from src.instruments.bond import Bond
 from src.instruments.pricing import price
+from src.utils.cashflows import generate_cashflows
 
 
 def macaulay_duration(bond: Bond, yield_rate: float) -> float:
@@ -27,10 +28,8 @@ def macaulay_duration(bond: Bond, yield_rate: float) -> float:
     """
     p = price(bond, yield_rate)
     rate_per_period = yield_rate / bond.freq
-    t = np.arange(1, bond.periods + 1)
-    cash_flows = np.full(bond.periods, bond.coupon_payment)
-    cash_flows[-1] += bond.face_value
-    weighted_pv = np.sum((t / bond.freq) * cash_flows / (1 + rate_per_period) ** t)
+    t, cf = generate_cashflows(bond)
+    weighted_pv = np.sum((t / bond.freq) * cf / (1 + rate_per_period) ** t)
     return float(weighted_pv / p)
 
 
