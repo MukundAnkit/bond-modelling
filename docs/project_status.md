@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-06-28 (v0.1.1 — Module 2: Risk & Sensitivity complete)
+> Last updated: 2026-06-28 (v0.2.0 — Module 3: Bootstrap complete)
 
 ---
 
@@ -50,7 +50,10 @@ bond_modelling/
 │   │   ├── effective.py        #   Effective Duration & Convexity (yield-curve bumping)
 │   │   ├── key_rate_duration.py#   Key Rate Duration (non-parallel shifts)
 │   │   └── stress.py           #   Basel IRBB non-parallel stress scenarios
-│   ├── bootstrap/      # Bootstrapping — not started
+│   ├── bootstrap/      # Bootstrapping — COMPLETE
+│   │   ├── __init__.py
+│   │   ├── bootstrap.py        #   Recursive spot-rate bootstrapping
+│   │   └── interpolate.py      #   Log-linear discount-factor interpolation
 │   ├── curve/   # Nelson-Siegel curve — not started
 │   ├── data/                   # Data source fetchers — not started
 │   └── utils/                  # Shared helpers — plotting.py added
@@ -72,11 +75,15 @@ bond_modelling/
 │   │   ├── test_effective.py        #   8 tests
 │   │   ├── test_key_rate_duration.py#   5 tests
 │   │   └── test_stress.py           #   9 tests
-│   ├── test_bootstrap/ # scaffold (empty)
+│   ├── test_bootstrap/ # Bootstrap tests — 26 passing
+│   │   ├── __init__.py
+│   │   ├── test_bootstrap.py      #  18 tests
+│   │   └── test_interpolate.py    #   8 tests
 │   └── test_nelsonsiegel/ # scaffold (empty)
 └── notebooks/
     ├── 01-single-instrument-pricing-verification.ipynb  # Textbook verification notebook
-    └── 02-risk-sensitivity-verification.ipynb           # Duration & convexity notebook
+    ├── 02-risk-sensitivity-verification.ipynb           # Duration & convexity notebook
+    └── 03-bootstrapping-verification.ipynb               # Bootstrapping verification notebook
 ```
 
 ---
@@ -103,8 +110,8 @@ bond_modelling/
 | Instruments (Pricing & YTM) | **Complete** | Bond dataclass, price(), YTM solver with Newton-Raphson + bisection fallback. Tolerance $10^{-6}$. |
 | Utils (Plotting) | **Complete** | `set_theme()`, `BOND_COLORS`, `FigureConfig`, `figure()`, `subplots()`, `finish_plot()`, `reference_line()`, `price_yield_curve()`. |
 | Risk (Sensitivity) | **Complete** | Macaulay/Modified Duration, Convexity, Taylor-series shock, Dollar Duration/DV01, Effective D/C, Key Rate Duration, Basel IRBB stress scenarios. |
-| Bootstrap (Term Structure) | **Next →** | Bootstrapping algorithm — scaffold ready |
-| Curve (Optimization) | Not started | Nelson-Siegel |
+| Bootstrap (Term Structure) | **Complete** | Recursive bootstrapping (annual + semi-annual), log-linear discount-factor interpolation. 26 tests. |
+| Curve (Optimization) | **Next →** | Nelson-Siegel — scaffold ready |
 
 ---
 
@@ -161,10 +168,23 @@ bond_modelling/
 
 ---
 
+## Bootstrap — Implementation Details
+
+### `bootstrap_spot_rates()` (`src/bootstrap/bootstrap.py`)
+- Recursive algorithm: first spot rate = first par yield, then strips coupons sequentially
+- Supports annual (`freq=1`) and semi-annual (`freq=2`) coupon payments
+- Semi-annual case uses log-linear discount-factor interpolation for intermediate cash flows
+
+### `interpolate_df()` (`src/bootstrap/interpolate.py`)
+- Log-linear interpolation of discount factors between known spot-rate grid points
+- Forward-fill for target times outside the grid (uses nearest spot rate)
+
+---
+
 ## Test Results
 
 ```
-96 passed in 0.54s
+122 passed in 0.43s
 ```
 
 | Test suite | Tests | Key coverage |
@@ -172,6 +192,7 @@ bond_modelling/
 | `test_pricing` | 16 | Bond validation, pricing (par/premium/discount/zero), YTM solvers |
 | `test_utils` | 18 | Plotting config, figure creation, price-yield curves |
 | `test_risk` | 62 | Duration, convexity, shock, dollar measures, effective D/C, key rate duration, stress |
+| `test_bootstrap` | 26 | Annual/semi-annual bootstrapping, interpolation, error handling |
 
 ---
 
@@ -181,7 +202,7 @@ Per the Execution Protocol in the MRD, development must proceed in order:
 
 1. ~~Instruments (Pricing & YTM — complete)~~
 2. ~~Risk (Sensitivity — complete)~~
-3. **Bootstrap**: Bootstrapping — implement spot-rate extraction from par-yield curve
-4. Curve: Nelson-Siegel — continuous curve optimization
+3. ~~Bootstrap (Term Structure — complete)~~
+4. **Curve**: Nelson-Siegel — continuous curve optimization
 
 Each module must be back-tested against established financial calculators before the next begins.
