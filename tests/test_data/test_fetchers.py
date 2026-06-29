@@ -47,9 +47,8 @@ def test_fred_fetcher_api_error():
     fetcher = FredFetcher()
     with patch(
         "src.data.fred.web.DataReader", side_effect=RequestException("API down")
-    ):  # noqa: E501, SIM117
-        with pytest.raises(DataFetchError, match="FRED fetch failed"):
-            fetcher.fetch_yield_curve(datetime.date(2023, 1, 5))
+    ), pytest.raises(DataFetchError, match="FRED fetch failed"):
+        fetcher.fetch_yield_curve(datetime.date(2023, 1, 5))
 
 
 def test_yfinance_fetcher_success():
@@ -107,9 +106,11 @@ def test_treasury_fetcher_normalization_error():
         "data": [{"record_date": "2023-01-05", "bc_10year": "invalid_number"}]
     }
 
-    with patch.object(fetcher.session, "get", return_value=mock_response):  # noqa: SIM117
-        with pytest.raises(DataNormalizationError):
-            fetcher.fetch_yield_curve(test_date)
+    with (
+        patch.object(fetcher.session, "get", return_value=mock_response),
+        pytest.raises(DataNormalizationError),
+    ):
+        fetcher.fetch_yield_curve(test_date)
 
 
 def test_mock_finra_fetcher():

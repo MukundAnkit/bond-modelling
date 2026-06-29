@@ -34,9 +34,10 @@ class GlobalSovereignFetcher(DataFetcher):
         """  # noqa: W293
         self.region = region.upper()
         if self.region not in self.SERIES_MAP:
+            supported = list(self.SERIES_MAP.keys())
             raise ValueError(
-                f"Region {self.region} not supported. Use one of {list(self.SERIES_MAP.keys())}"
-            )  # noqa: E501
+                f"Region {self.region} not supported. Use one of {supported}"
+            )
 
         self.series_id = self.SERIES_MAP[self.region]
 
@@ -48,8 +49,9 @@ class GlobalSovereignFetcher(DataFetcher):
 
         """  # noqa: D401, W293
         logger.info(
-            f"Fetching 10-year Sovereign Yield for {self.region} from FRED for date {date}"
-        )  # noqa: E501
+            f"Fetching 10-year Sovereign Yield for {self.region}"
+            f" from FRED for date {date}"
+        )
 
         # Monthly data requires a wider lookback window (e.g. 60 days) to find the most recent month  # noqa: E501
         start_date = date - datetime.timedelta(days=60)
@@ -62,9 +64,11 @@ class GlobalSovereignFetcher(DataFetcher):
             raise DataFetchError(f"FRED Global Sovereign API fetch failed: {e}") from e
 
         if df.empty:
-            raise DataFetchError(
-                f"No sovereign data returned from FRED for {self.series_id} up to {date}"
-            )  # noqa: E501
+            msg = (
+                f"No sovereign data returned from FRED for"
+                f" {self.series_id} up to {date}"
+            )
+            raise DataFetchError(msg)
 
         try:
             # Forward fill the monthly values to approximate the requested daily date

@@ -33,9 +33,11 @@ class MockFinraFetcher(DataFetcher):
         """Generate mock yields. The `date` parameter is ignored since the base curve
         is provided during initialization for the sake of the mock.
         """  # noqa: D205
+        bps = self.spread_decimal * 10000
         logger.debug(
-            f"Generating Mock FINRA data (Municipal: {self.is_municipal}, Spread: {self.spread_decimal * 10000:.1f} bps)"
-        )  # noqa: E501
+            f"Generating Mock FINRA data (Municipal: {self.is_municipal},"
+            f" Spread: {bps:.1f} bps)"
+        )
 
         curve = {}
         for maturity, base_yield in self.base_curve.items():

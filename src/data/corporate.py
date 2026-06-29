@@ -38,9 +38,10 @@ class CorporateFetcher(DataFetcher):
         """  # noqa: E501, W291, W293
         self.rating = rating.upper()
         if self.rating not in self.SERIES_MAP:
+            supported = list(self.SERIES_MAP.keys())
             raise ValueError(
-                f"Rating {self.rating} not supported. Use one of {list(self.SERIES_MAP.keys())}"
-            )  # noqa: E501
+                f"Rating {self.rating} not supported. Use one of {supported}"
+            )
 
         self.series_id = self.SERIES_MAP[self.rating]
         self.proxy_maturity = proxy_maturity
@@ -67,9 +68,11 @@ class CorporateFetcher(DataFetcher):
             raise DataFetchError(f"FRED corporate API fetch failed: {e}") from e
 
         if df.empty:
-            raise DataFetchError(
-                f"No corporate data returned from FRED for {self.series_id} up to {date}"
-            )  # noqa: E501
+            msg = (
+                f"No corporate data returned from FRED for"
+                f" {self.series_id} up to {date}"
+            )
+            raise DataFetchError(msg)
 
         try:
             # Forward fill missing values
