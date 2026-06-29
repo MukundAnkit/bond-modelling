@@ -38,7 +38,9 @@ class FredFetcher(DataFetcher):
             raise DataFetchError(f"FRED fetch failed: {e}") from e
 
         if df.empty:
-            raise MarketHolidayError(f"No FRED data available for {date} (or preceding days).")  # noqa: E501
+            raise MarketHolidayError(
+                f"No FRED data available for {date} (or preceding days)."
+            )  # noqa: E501
 
         # Forward fill to handle NaNs (e.g., if a specific series is missing on a day where others are present)  # noqa: E501
         df = df.ffill()
@@ -52,8 +54,10 @@ class FredFetcher(DataFetcher):
             raise DataNormalizationError("FRED returned empty dataframe after parsing.")  # noqa: B904
 
         if actual_date > date:
-             # Should not happen as we bound the end date, but good to check.
-             raise MarketHolidayError(f"Available date {actual_date} is past requested date {date}.")  # noqa: E501
+            # Should not happen as we bound the end date, but good to check.
+            raise MarketHolidayError(
+                f"Available date {actual_date} is past requested date {date}."
+            )  # noqa: E501
 
         logger.debug(f"FRED raw response for {actual_date}: {latest_row.to_dict()}")
 
@@ -66,7 +70,9 @@ class FredFetcher(DataFetcher):
             try:
                 curve[maturity] = float(val) / 100.0
             except ValueError as e:
-                raise DataNormalizationError(f"Could not convert FRED value {val} to float") from e  # noqa: E501
+                raise DataNormalizationError(
+                    f"Could not convert FRED value {val} to float"
+                ) from e  # noqa: E501
 
         if not curve:
             raise DataNormalizationError("No valid yields found in FRED response.")

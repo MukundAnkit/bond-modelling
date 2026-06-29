@@ -21,8 +21,7 @@ class YFinanceFetcher(DataFetcher):
     }
 
     def fetch_yield_curve(self, date: datetime.date) -> dict[float, float]:
-        """Fetch Yahoo Finance Treasury yields for a specific date.
-        """  # noqa: D200
+        """Fetch Yahoo Finance Treasury yields for a specific date."""  # noqa: D200
         tickers = list(self.TICKER_MAPPING.keys())
 
         # yfinance download expects strings, and to get a specific date, we fetch a short window  # noqa: E501
@@ -32,7 +31,9 @@ class YFinanceFetcher(DataFetcher):
 
         try:
             # Multi-ticker download returns a dataframe with multi-level columns if multiple tickers  # noqa: E501
-            df = yf.download(tickers, start=start_date_str, end=end_date_str, progress=False)  # noqa: E501
+            df = yf.download(
+                tickers, start=start_date_str, end=end_date_str, progress=False
+            )  # noqa: E501
         except Exception as e:
             logger.error(f"Failed to fetch from YFinance: {e}")
             raise DataFetchError(f"YFinance fetch failed: {e}") from e
@@ -71,7 +72,9 @@ class YFinanceFetcher(DataFetcher):
             try:
                 curve[maturity] = float(val) / 1000.0
             except ValueError as e:
-                raise DataNormalizationError(f"Could not convert YFinance value {val} to float") from e  # noqa: E501
+                raise DataNormalizationError(
+                    f"Could not convert YFinance value {val} to float"
+                ) from e  # noqa: E501
 
         if not curve:
             raise DataNormalizationError("No valid yields found in YFinance response.")

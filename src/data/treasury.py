@@ -17,10 +17,10 @@ class TreasuryFetcher(DataFetcher):
     BASE_URL = "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/daily_treasury_yield_curve"
 
     FIELD_MAPPING = {
-        "bc_1month": 1/12,
-        "bc_2month": 2/12,
+        "bc_1month": 1 / 12,
+        "bc_2month": 2 / 12,
         "bc_3month": 0.25,
-        "bc_4month": 4/12,
+        "bc_4month": 4 / 12,
         "bc_6month": 0.5,
         "bc_1year": 1.0,
         "bc_2year": 2.0,
@@ -44,8 +44,7 @@ class TreasuryFetcher(DataFetcher):
         self.session.mount("http://", adapter)
 
     def fetch_yield_curve(self, date: datetime.date) -> dict[float, float]:
-        """Fetch Treasury yields for a specific date.
-        """  # noqa: D200
+        """Fetch Treasury yields for a specific date."""  # noqa: D200
         # The API allows querying exact dates. If a date is a holiday, it returns an empty array.  # noqa: E501
         # To handle holidays similarly to FRED (forward fill), we request a date range.
         start_date = (date - datetime.timedelta(days=10)).strftime("%Y-%m-%d")
@@ -66,7 +65,9 @@ class TreasuryFetcher(DataFetcher):
             logger.error(f"Failed to fetch from Treasury API: {e}")
             raise DataFetchError(f"Treasury API fetch failed: {e}") from e
         except ValueError as e:
-            raise DataNormalizationError(f"Failed to parse Treasury JSON response: {e}") from e  # noqa: E501
+            raise DataNormalizationError(
+                f"Failed to parse Treasury JSON response: {e}"
+            ) from e  # noqa: E501
 
         records = data.get("data", [])
         if not records:
@@ -85,9 +86,13 @@ class TreasuryFetcher(DataFetcher):
             try:
                 curve[maturity] = float(val) / 100.0
             except ValueError as e:
-                raise DataNormalizationError(f"Could not convert Treasury value '{val}' for {field} to float") from e  # noqa: E501
+                raise DataNormalizationError(
+                    f"Could not convert Treasury value '{val}' for {field} to float"
+                ) from e  # noqa: E501
 
         if not curve:
-            raise DataNormalizationError("No valid yields found in Treasury API response.")  # noqa: E501
+            raise DataNormalizationError(
+                "No valid yields found in Treasury API response."
+            )  # noqa: E501
 
         return curve

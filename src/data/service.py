@@ -45,7 +45,9 @@ class MarketDataService:
         for fetcher in self.fetchers:
             fetcher_name = fetcher.__class__.__name__
             try:
-                logger.info(f"Attempting to fetch yield curve for {date} using {fetcher_name}")  # noqa: E501
+                logger.info(
+                    f"Attempting to fetch yield curve for {date} using {fetcher_name}"
+                )  # noqa: E501
                 curve = fetcher.fetch_yield_curve(date)
 
                 # Save to cache if successful

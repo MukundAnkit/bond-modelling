@@ -14,7 +14,7 @@ class DataFetcher(ABC):
 
         Returns:
             A dictionary mapping maturity in years (float) to the yield in decimal format (e.g., 0.0425 for 4.25%).
-            
+
         Raises:
             DataFetchError: If the source API fails or is unreachable.
             MarketHolidayError: If the requested date is a holiday/weekend and no valid data exists.
