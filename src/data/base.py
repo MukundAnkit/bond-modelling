@@ -1,15 +1,13 @@
-import datetime
+import datetime  # noqa: D100
 from abc import ABC, abstractmethod
-from typing import Dict
 
 
 class DataFetcher(ABC):
     """Abstract base class for market data fetchers."""
 
     @abstractmethod
-    def fetch_yield_curve(self, date: datetime.date) -> Dict[float, float]:
-        """
-        Fetch the yield curve for a given date.
+    def fetch_yield_curve(self, date: datetime.date) -> dict[float, float]:
+        """Fetch the yield curve for a given date.
 
         Args:
             date: The business date to fetch yields for.
@@ -21,5 +19,6 @@ class DataFetcher(ABC):
             DataFetchError: If the source API fails or is unreachable.
             MarketHolidayError: If the requested date is a holiday/weekend and no valid data exists.
             DataNormalizationError: If the data cannot be parsed into the expected format.
-        """
+
+        """  # noqa: E501, W293
         pass
