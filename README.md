@@ -6,6 +6,9 @@ Progressive fixed-income pricing and risk engine, built from the ground up acros
 2. **Risk Sensitivity** — Duration & Convexity
 3. **Discrete Term Structure** — Bootstrapping
 4. **Continuous Curve Optimization** — Nelson-Siegel
+5. **Portfolio Level Analytics** — Risk Engine & Aggregation
+6. **Market Data Integrations** — Yield Curve Data Fetchers
+7. **Stochastic Rate Models** — PCA & Vasicek/CIR Simulations
 
 ## Setup
 
@@ -48,6 +51,8 @@ src/
 ├── risk/              # Duration & convexity
 ├── bootstrap/         # Discrete term structure bootstrapping
 ├── curve/             # Continuous yield curve (Nelson-Siegel)
+├── models/            # Stochastic rate models (Vasicek, CIR, PCA, Monte Carlo)
+├── portfolio/         # Portfolio aggregation and risk engine
 ├── data/              # Data source fetchers
 └── utils/             # Shared helpers
 ```
