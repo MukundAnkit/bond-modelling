@@ -45,9 +45,10 @@ def test_fred_fetcher_success():
 
 def test_fred_fetcher_api_error():
     fetcher = FredFetcher()
-    with patch(
-        "src.data.fred.web.DataReader", side_effect=RequestException("API down")
-    ), pytest.raises(DataFetchError, match="FRED fetch failed"):
+    with (
+        patch("src.data.fred.web.DataReader", side_effect=RequestException("API down")),
+        pytest.raises(DataFetchError, match="FRED fetch failed"),
+    ):
         fetcher.fetch_yield_curve(datetime.date(2023, 1, 5))
 
 
