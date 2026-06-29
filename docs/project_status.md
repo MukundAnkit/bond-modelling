@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-06-28 (v0.4.0 — Module 5: Portfolio engine & Caching complete)
+> Last updated: 2026-06-29 (v0.6.0 — Module 7: Stochastic Models complete)
 
 ---
 
@@ -57,9 +57,19 @@ bond_modelling/
 │   ├── curve/          # Nelson-Siegel curve — COMPLETE
 │   │   ├── __init__.py
 │   │   └── nelson_siegel.py    #   Nelson-Siegel curve model & optimizer
-│   ├── data/                   # Data source fetchers — in progress
+│   ├── data/                   # Data source fetchers — COMPLETE
 │   │   ├── __init__.py
+│   │   ├── base.py             #   Base fetcher interface
+│   │   ├── fred.py             #   FRED API (pandas_datareader)
+│   │   ├── treasury.py         #   US Treasury Fiscal Data
+│   │   ├── yfinance_fetcher.py #   Yahoo Finance
+│   │   ├── finra.py            #   FINRA Bond Center mock
 │   │   └── validation.py       #   Crossover yield curve validation helper
+│   ├── models/                 # Stochastic rate models — COMPLETE
+│   │   ├── __init__.py
+│   │   ├── stochastic.py       #   Vasicek and CIR analytical pricing
+│   │   ├── monte_carlo.py      #   Euler-Maruyama simulation engine
+│   │   └── calibration.py      #   Model calibration (OLS/MLE)
 │   ├── portfolio/      # Portfolio aggregation — COMPLETE
 │   │   ├── __init__.py
 │   │   ├── portfolio.py        #   Portfolio aggregate risk & Basel stress
@@ -103,7 +113,9 @@ bond_modelling/
     ├── 02-risk-sensitivity-verification.ipynb           # Duration & convexity notebook
     ├── 03-bootstrapping-verification.ipynb               # Bootstrapping verification notebook
     ├── 04-nelson-siegel-verification.ipynb              # Nelson-Siegel verification notebook
-    └── 05-portfolio-caching-verification.ipynb          # Portfolio & Caching verification notebook
+    ├── 05-portfolio-caching-verification.ipynb          # Portfolio & Caching verification notebook
+    ├── 06-data-source-fetchers-exploration.ipynb        # Data Source fetchers notebook
+    └── 07-stochastic-simulation-verification.ipynb      # PCA and Stochastic Monte Carlo notebook
 ```
 
 ---
@@ -119,7 +131,7 @@ bond_modelling/
 | PR template | Checklist with type tags + verification steps |
 | Workflow guide | See [`docs/development_workflow.md`](development_workflow.md) |
 | Latest release | [`v0.1.0`](https://github.com/MukundAnkit/bond-modelling/releases/tag/v0.1.0) — Module 1: Single Instrument Pricing |
-| Latest tag (unreleased) | `v0.2.0` — Module 2: Risk & Sensitivity (on `dev`) |
+| Latest tag (unreleased) | `v0.6.0` — Module 7: Stochastic Models (on `dev`) |
 
 ---
 
@@ -134,6 +146,8 @@ bond_modelling/
 | Curve (Optimization) | **Complete** | Nelson-Siegel continuous parametric curve optimization via multi-start Nelder-Mead. 8 tests. |
 | Portfolio (Aggregation) | **Complete** | Position and Portfolio classes, MV-weighted duration/convexity, DV01, KRD vectors, and Basel stress testing. 4 tests. |
 | Caching & Validation | **Complete** | JSONCache with TTL validation, cross_validate_yields comparing FRED vs yfinance. 6 tests. |
+| Data Integrations | **Complete** | FredFetcher, TreasuryFetcher, YFinanceFetcher, and FINRA mocks. |
+| Stochastic Models | **Complete** | PCA curve extraction, Vasicek/CIR models, calibration, Monte Carlo paths. |
 
 ---
 
@@ -239,6 +253,28 @@ bond_modelling/
 
 ---
 
+## Data Fetchers — Implementation Details
+
+### Data Fetching interfaces (`src/data/`)
+- `FredFetcher`: Retrieves treasury yields via `pandas_datareader`.
+- `YFinanceFetcher`: Retrieves sovereign benchmark rates via `yfinance`.
+- `TreasuryFetcher`: Uses US Treasury Fiscal API.
+
+---
+
+## Stochastic Models — Implementation Details
+
+### PCA Extraction (`src/curve/pca.py`)
+- Standardizes empirical yield curve panels (e.g., from FRED).
+- Extracts Level, Slope, and Curvature components.
+
+### Vasicek & CIR (`src/models/stochastic.py`, `calibration.py`)
+- Implements closed-form zero-coupon bond pricing under affine term structure.
+- Calibrates mean-reversion $\kappa$, long-term mean $\theta$, and volatility $\sigma$ using empirical regressions.
+- `MonteCarloEngine` runs Euler-Maruyama discretization for path generation.
+
+---
+
 ## Test Results
 
 ```
@@ -266,4 +302,8 @@ Per the Execution Protocol in the MRD, development must proceed in order:
 3. ~~Bootstrap (Term Structure — complete)~~
 4. ~~Curve (Continuous Optimization — complete)~~
 
-Next Steps: Data Source Fetchers (FRED, Yahoo Finance, FINRA) integration and pipeline setup.
+5. ~~Portfolio Analytics (Aggregation — complete)~~
+6. ~~Data Source Fetchers (FRED, yfinance — complete)~~
+7. ~~Stochastic Rate Models (PCA, Vasicek, CIR — complete)~~
+
+Next Steps: Project Complete. Further enhancements to be decided (e.g., credit risk modeling, MBS prepayments).
