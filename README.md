@@ -1,6 +1,6 @@
 # Bond Modelling
 
-Progressive fixed-income pricing and risk engine, built from the ground up across four modules:
+Progressive fixed-income pricing and risk engine, built from the ground up across twelve modules:
 
 1. **Single Instrument Pricing** — Price & Yield-to-Maturity calculator
 2. **Risk Sensitivity** — Duration & Convexity
@@ -10,6 +10,10 @@ Progressive fixed-income pricing and risk engine, built from the ground up acros
 6. **Market Data Integrations** — Yield Curve Data Fetchers
 7. **Stochastic Rate Models** — PCA & Vasicek/CIR Simulations
 8. **Interest Rate Derivatives** — Swaps, Caps/Floors, Swaptions
+9. **Credit Risk & CDS** — Hazard Rates & Structural Models
+10. **MBS & Prepayment** — Pass-throughs & OAS
+11. **Advanced Term Structure** — Trinomial & Hull-White Trees
+12. **Inflation-Linked Bonds** — Real Yields & TIPS
 
 ## Setup
 
@@ -55,6 +59,11 @@ src/
 ├── models/            # Stochastic rate models (Vasicek, CIR, PCA, Monte Carlo)
 ├── portfolio/         # Portfolio aggregation and risk engine
 ├── data/              # Data source fetchers
+├── credit/            # Credit risk & CDS pricing
+├── mbs/               # Mortgage-backed securities & prepayment
+├── trees/             # Interest rate trees (Trinomial, Hull-White)
+├── inflation/         # Inflation-linked bonds (TIPS)
+├── derivatives/       # Interest rate derivatives (Swaps, Caps, Swaptions)
 └── utils/             # Shared helpers
 ```
 

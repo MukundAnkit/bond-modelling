@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-07-02 (v0.7.0 — Module 8: Interest Rate Derivatives complete)
+> Last updated: 2026-07-02 (v0.11.0 — Module 12: Inflation-Linked Bonds complete)
 
 ---
 
@@ -138,7 +138,7 @@ bond_modelling/
 | PR template | Checklist with type tags + verification steps |
 | Workflow guide | See [`docs/development_workflow.md`](development_workflow.md) |
 | Latest release | [`v0.1.0`](https://github.com/MukundAnkit/bond-modelling/releases/tag/v0.1.0) — Module 1: Single Instrument Pricing |
-| Latest tag (unreleased) | `v0.7.0` — Module 8: Interest Rate Derivatives (on `dev`) |
+| Latest tag (unreleased) | `v0.11.0` — Module 12: Inflation-Linked Bonds (on `dev`) |
 
 ---
 
@@ -156,6 +156,10 @@ bond_modelling/
 | Data Integrations | **Complete** | FredFetcher, TreasuryFetcher, YFinanceFetcher, and FINRA mocks. |
 | Stochastic Models | **Complete** | PCA curve extraction, Vasicek/CIR models, calibration, Monte Carlo paths. |
 | Derivatives | **Complete** | Vanilla Swaps, Caps, Floors, Swaptions using Vasicek analytical and Black (1976) models. |
+| Credit Risk & CDS | **Complete** | Hazard rate calibration, structural (Merton) models, and single-name CDS pricing. |
+| MBS & Prepayment | **Complete** | CPR/SMM prepayment modeling, pass-through cash flows, Option-Adjusted Spread (OAS). |
+| Advanced Trees | **Complete** | Trinomial trees, Hull-White lattice, Bermudan swaption pricing. |
+| Inflation Bonds | **Complete** | TIPS, real vs. nominal curves, and break-even inflation calculations. |
 
 ---
 
@@ -333,5 +337,9 @@ Per the Execution Protocol in the MRD, development must proceed in order:
 6. ~~Data Source Fetchers (FRED, yfinance — complete)~~
 7. ~~Stochastic Rate Models (PCA, Vasicek, CIR — complete)~~
 8. ~~Interest Rate Derivatives (Swaps, Caps/Floors, Swaptions — complete)~~
+9. ~~Credit Risk & CDS (Hazard rates, Merton — complete)~~
+10. ~~MBS & Prepayment (CPR, OAS — complete)~~
+11. ~~Advanced Term Structure & Trees (Trinomial, Hull-White — complete)~~
+12. ~~Inflation-Linked Bonds (TIPS — complete)~~
 
-Next Steps: Project Complete. Further enhancements to be decided (e.g., credit risk modeling, MBS prepayments).
+Next Steps: Begin Module 13 — Value at Risk (VaR) & Expected Shortfall (ES).
