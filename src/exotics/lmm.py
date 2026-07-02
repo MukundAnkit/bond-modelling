@@ -4,7 +4,13 @@ import numpy as np
 
 
 class LiborMarketModel:
-    def __init__(self, forward_rates: list[float], tenors: list[float], volatilities: list[float], correlation_matrix: list[list[float]]) -> None:
+    def __init__(
+        self,
+        forward_rates: list[float],
+        tenors: list[float],
+        volatilities: list[float],
+        correlation_matrix: list[list[float]],
+    ) -> None:
         """
         Initialize the LIBOR Market Model (BGM).
 

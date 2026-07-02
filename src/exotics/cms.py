@@ -5,7 +5,11 @@ import numpy as np
 
 class ConstantMaturitySwap:
     def __init__(
-        self, forward_swap_rate: float, swap_tenor_years: float, payment_frequency: float, volatility: float
+        self,
+        forward_swap_rate: float,
+        swap_tenor_years: float,
+        payment_frequency: float,
+        volatility: float,
     ) -> None:
         self.S0 = forward_swap_rate
         self.tenor = swap_tenor_years
