@@ -114,6 +114,10 @@ class HWTree(TrinomialTree):
                         self.Q[i + 1][k] = 0.0
                     self.Q[i + 1][k] += self.Q[i][j] * p * discount
 
+    def get_nodes_at_step(self, i: int) -> list[int]:
+        """Get list of node indices at a given time step."""
+        return self._get_j_nodes(i)
+
     def get_rate(self, i: int, j: int) -> float:
         """Get short rate."""
         return float(self.alpha[i] + j * self.dr)

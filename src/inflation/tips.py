@@ -7,6 +7,48 @@ import numpy as np
 from src.instruments.bond import Bond
 
 
+def price_tips(
+    face_value: float,
+    coupon_rate: float,
+    maturity: float,
+    real_ytm: float,
+    index_ratio: float,
+    freq: int = 2,
+) -> float:
+    """Price a TIPS bond given its real yield to maturity.
+
+    Parameters
+    ----------
+    face_value : float
+        Face value of the bond.
+    coupon_rate : float
+        Real coupon rate (annual).
+    maturity : float
+        Time to maturity in years.
+    real_ytm : float
+        Real yield to maturity (annual).
+    index_ratio : float
+        Current index ratio (CPI_current / CPI_base).
+    freq : int, optional
+        Coupon frequency per year. Default is 2.
+
+    Returns
+    -------
+    float
+        Invoice price of the TIPS bond.
+
+    """
+    periods = int(maturity * freq)
+    coupon = coupon_rate / freq
+    ytm = real_ytm / freq
+
+    periods_arr = np.arange(1, periods + 1)
+    pv_coupons = float(np.sum(coupon * face_value / (1 + ytm) ** periods_arr))
+    pv_principal = face_value / (1 + ytm) ** periods
+
+    return float((pv_coupons + pv_principal) * index_ratio)
+
+
 @dataclass
 class TIPS(Bond):
     """Treasury Inflation-Protected Security (TIPS).
