@@ -9,6 +9,7 @@ Progressive fixed-income pricing and risk engine, built from the ground up acros
 5. **Portfolio Level Analytics** — Risk Engine & Aggregation
 6. **Market Data Integrations** — Yield Curve Data Fetchers
 7. **Stochastic Rate Models** — PCA & Vasicek/CIR Simulations
+8. **Interest Rate Derivatives** — Swaps, Caps/Floors, Swaptions
 
 ## Setup
 
