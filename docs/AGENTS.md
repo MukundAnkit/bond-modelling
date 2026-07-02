@@ -90,8 +90,9 @@ When starting a new module or feature, follow this flow:
 1. Human reviews the walkthrough, the diff, and the implementation-level commits on the feature branch.
 2. Human runs final local checks if desired.
 3. Human removes feature-specific artifacts (`docs/implementation_plan.md`, `docs/walkthrough.md`) from the feature branch (`git rm docs/implementation_plan.md docs/walkthrough.md && git commit -m "chore: clean up feature artifacts"`).
-4. Human performs the final feature-level checkpointing (squash-merging the feature branch into `dev`).
-5. Human flushes the context window and opens a new session for the next feature.
+4. **PR Creation & Markdown Body Rule**: When creating Pull Requests via the `gh` CLI, the Agent MUST dynamically generate a fresh temporary file for the PR body (e.g., `/tmp/pr_body.md` or via standard input) immediately before execution. The Agent MUST NOT reference previously persisted artifacts (e.g., `scratch/pr_body.md`) as the `--body-file`, as they may contain stale data from previous iterations.
+5. Human performs the final feature-level checkpointing (squash-merging the feature branch into `dev`).
+6. Human flushes the context window and opens a new session for the next feature.
 
 5. Human-Agent Interaction & Token Hygiene Protocols
 
