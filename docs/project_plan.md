@@ -150,3 +150,18 @@ This MRD requires that development strictly follows the module sequence. Module 
 - Construct Real vs. Nominal yield curves.
 - Calculate Break-Even Inflation rates.
 - Price TIPS (Treasury Inflation-Protected Securities).
+
+### 7.5. Module 14: Structured Products & Correlation
+- Implement Gaussian and Student-t Copulas for default correlation.
+- Implement tranche loss calculations (Equity, Mezzanine, Senior).
+- Price Synthetic CDOs and cash flow CLOs based on pool loss distributions.
+
+### 7.6. Module 15: Advanced Interest Rate Exotics
+- Implement the LIBOR Market Model (LMM / BGM) for joint forward rate evolution.
+- Price Constant Maturity Swaps (CMS) and calculate convexity adjustments.
+- Monte Carlo valuation of Target Redemption Notes (TARNs).
+
+### 7.7. Module 16: XVA & Counterparty Credit Risk
+- Simulate Expected Exposure (EE) and Potential Future Exposure (PFE) profiles.
+- Calculate Credit Valuation Adjustment (CVA) and Debt Valuation Adjustment (DVA).
+- Incorporate Funding Valuation Adjustment (FVA) for asymmetric borrowing costs.
