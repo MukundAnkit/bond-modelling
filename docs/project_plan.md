@@ -126,3 +126,27 @@ $$
 ## 6. Execution Protocol
 
 This MRD requires that development strictly follows the module sequence. Module N must be thoroughly back-tested against established financial calculators (like a Bloomberg terminal output or verified textbook examples) before development begins on Module N+1.
+
+---
+
+## 7. Extensions (Modules 9 - 12)
+
+### 7.1. Module 9: Credit Risk & CDS
+- Implement hazard rate calibration from credit spreads.
+- Implement structural models (e.g., Merton model) for firm default probability.
+- Implement single-name Credit Default Swap (CDS) pricing.
+
+### 7.2. Module 10: MBS & Prepayment
+- Implement CPR (Conditional Prepayment Rate) and SMM (Single Monthly Mortality).
+- Generate pass-through mortgage cash flows.
+- Implement Option-Adjusted Spread (OAS) for pricing embedded prepayment optionality.
+
+### 7.3. Module 11: Advanced Term Structure & Trees
+- Build Trinomial Trees for interest rate evolution.
+- Implement Hull-White lattice generation.
+- Value Bermudan swaptions using backward induction on trees.
+
+### 7.4. Module 12: Inflation-Linked Bonds
+- Construct Real vs. Nominal yield curves.
+- Calculate Break-Even Inflation rates.
+- Price TIPS (Treasury Inflation-Protected Securities).
