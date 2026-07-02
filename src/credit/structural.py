@@ -6,6 +6,60 @@ import numpy as np
 from scipy.stats import norm
 
 
+def merton_distance_to_default(
+    asset_value: float,
+    debt_face_value: float,
+    asset_volatility: float,
+    risk_free_rate: float,
+    time_to_maturity: float,
+) -> float:
+    """Calculate distance to default using the Merton model.
+
+    Parameters
+    ----------
+    asset_value : float
+        Current market value of firm's assets.
+    debt_face_value : float
+        Face value of debt.
+    asset_volatility : float
+        Volatility of firm's assets.
+    risk_free_rate : float
+        Risk-free interest rate (continuous).
+    time_to_maturity : float
+        Time to debt maturity in years.
+
+    Returns
+    -------
+    float
+        Distance to default.
+
+    """
+    return MertonModel(
+        V=asset_value,
+        D=debt_face_value,
+        T=time_to_maturity,
+        r=risk_free_rate,
+        sigma_V=asset_volatility,
+    ).distance_to_default()
+
+
+def merton_probability_of_default(distance_to_default: float) -> float:
+    """Calculate risk-neutral probability of default from distance to default.
+
+    Parameters
+    ----------
+    distance_to_default : float
+        Distance to default (DD).
+
+    Returns
+    -------
+    float
+        Risk-neutral probability of default.
+
+    """
+    return float(norm.cdf(-distance_to_default))
+
+
 @dataclass
 class MertonModel:
     """Merton (1974) Structural Credit Model.

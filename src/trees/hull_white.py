@@ -4,6 +4,8 @@ from collections.abc import Callable
 
 import numpy as np
 
+from src.trees.trinomial_tree import HWTree
+
 
 class HullWhite1F:
     """Hull-White 1-Factor Model: dr(t) = (theta(t) - a * r(t))dt + sigma * dW(t)."""
@@ -54,3 +56,9 @@ class HullWhite1F:
         a_val = self.a_factor(t, t_end, p_0_t, p_0_end)
         b_val = self.b_factor(t, t_end)
         return float(a_val * np.exp(-b_val * r_t))
+
+
+class HullWhiteTree(HWTree):
+    """Hull-White Trinomial Tree (alias for HWTree)."""
+
+    pass

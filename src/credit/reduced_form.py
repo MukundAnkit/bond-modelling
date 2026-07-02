@@ -67,6 +67,43 @@ def piecewise_hazard_survival(
     return float(np.exp(-integral))
 
 
+def calibrate_hazard_rates(
+    maturities: np.ndarray, spreads: np.ndarray, recovery_rate: float
+) -> np.ndarray:
+    """Bootstrap piecewise constant hazard rates from bond spreads.
+
+    Parameters
+    ----------
+    maturities : np.ndarray
+        Bond maturities in years.
+    spreads : np.ndarray
+        Credit spreads for each maturity (continuous).
+    recovery_rate : float
+        Expected recovery rate.
+
+    Returns
+    -------
+    np.ndarray
+        Piecewise constant hazard rates for each maturity interval.
+
+    """
+    survival: list[float] = []
+    hazard_rates_list: list[float] = []
+
+    for i, (t, s) in enumerate(zip(maturities, spreads, strict=True)):
+        surv = (np.exp(-s * t) - recovery_rate) / (1.0 - recovery_rate)
+        surv = max(surv, 1e-10)
+        survival.append(float(surv))
+
+        cum_hazard = -np.log(survival[i])
+        prev_hazard = 0.0 if i == 0 else -np.log(survival[i - 1])
+        dt = t if i == 0 else t - maturities[i - 1]
+        lam = (cum_hazard - prev_hazard) / dt
+        hazard_rates_list.append(float(max(lam, 0.0)))
+
+    return np.array(hazard_rates_list)
+
+
 def jarrow_turnbull_price(
     curve: Callable[[float], float],
     survival: Callable[[float], float],

@@ -5,6 +5,27 @@ import numpy as np
 from src.bootstrap.bootstrap import bootstrap_spot_rates
 
 
+def generate_real_curve(
+    nominal_yields: np.ndarray, breakeven_inflation: np.ndarray
+) -> np.ndarray:
+    """Calculate real yields from nominal yields and breakeven inflation.
+
+    Parameters
+    ----------
+    nominal_yields : np.ndarray
+        Nominal zero-coupon yields.
+    breakeven_inflation : np.ndarray
+        Breakeven inflation rates.
+
+    Returns
+    -------
+    np.ndarray
+        Implied real yields.
+
+    """
+    return (1.0 + nominal_yields) / (1.0 + breakeven_inflation) - 1.0
+
+
 def bootstrap_real_rates(
     maturities: np.ndarray, real_par_yields: np.ndarray, freq: int = 2
 ) -> np.ndarray:
