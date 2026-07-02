@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-07-02 (v0.11.0 — Module 12: Inflation-Linked Bonds complete)
+> Last updated: 2026-07-02 (v0.14.0 — Module 16: XVA complete)
 
 ---
 
@@ -160,6 +160,10 @@ bond_modelling/
 | MBS & Prepayment | **Complete** | CPR/SMM prepayment modeling, pass-through cash flows, Option-Adjusted Spread (OAS). |
 | Advanced Trees | **Complete** | Trinomial trees, Hull-White lattice, Bermudan swaption pricing. |
 | Inflation Bonds | **Complete** | TIPS, real vs. nominal curves, and break-even inflation calculations. |
+| Value at Risk (VaR) | **Complete** | Historical, Parametric, and Monte Carlo VaR & Expected Shortfall computation. |
+| Structured Products | **Complete** | Gaussian/Student-t Copulas, Tranche loss (Equity/Mezz/Senior), Synthetic CDO/CLO pricing. |
+| Interest Rate Exotics | **Complete** | LIBOR Market Model (LMM/BGM), Constant Maturity Swaps (CMS), Target Redemption Notes (TARNs). |
+| XVA & Counterparty Risk | **Complete** | EE/PFE exposure simulation, Credit Valuation Adjustment (CVA), Debt (DVA), and Funding (FVA). |
 
 ---
 
@@ -341,5 +345,9 @@ Per the Execution Protocol in the MRD, development must proceed in order:
 10. ~~MBS & Prepayment (CPR, OAS — complete)~~
 11. ~~Advanced Term Structure & Trees (Trinomial, Hull-White — complete)~~
 12. ~~Inflation-Linked Bonds (TIPS — complete)~~
+13. ~~Value at Risk (VaR & ES — complete)~~
+14. ~~Structured Products (CDOs & Copulas — complete)~~
+15. ~~Advanced Interest Rate Exotics (LMM, CMS, TARNs — complete)~~
+16. ~~XVA & Counterparty Credit Risk (CVA, DVA, FVA — complete)~~
 
-Next Steps: Begin Module 13 — Value at Risk (VaR) & Expected Shortfall (ES).
+Next Steps: Project Complete! All 16 core mathematical modules have been successfully implemented.

@@ -14,6 +14,10 @@ Progressive fixed-income pricing and risk engine, built from the ground up acros
 10. **MBS & Prepayment** — Pass-throughs & OAS
 11. **Advanced Term Structure** — Trinomial & Hull-White Trees
 12. **Inflation-Linked Bonds** — Real Yields & TIPS
+13. **Value at Risk (VaR)** — Historical, Parametric, Monte Carlo VaR & Expected Shortfall
+14. **Structured Products** — Copulas, CDOs, & Tranche Pricing
+15. **Advanced Interest Rate Exotics** — LMM, CMS, & TARNs
+16. **XVA & Counterparty Risk** — CVA, DVA, FVA, & Exposure Profiles
 
 ## Setup
 
@@ -63,6 +67,9 @@ src/
 ├── mbs/               # Mortgage-backed securities & prepayment
 ├── trees/             # Interest rate trees (Trinomial, Hull-White)
 ├── inflation/         # Inflation-linked bonds (TIPS)
+├── structured/        # Copulas & CDO pricing
+├── exotics/           # LIBOR Market Model, CMS, TARNs
+├── xva/               # CVA, DVA, FVA, & EE/PFE profiles
 ├── derivatives/       # Interest rate derivatives (Swaps, Caps, Swaptions)
 └── utils/             # Shared helpers
 ```
