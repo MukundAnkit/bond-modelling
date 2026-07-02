@@ -1,4 +1,5 @@
 """Unit tests for Interest Rate Swaps."""
+
 import numpy as np
 import pytest
 
@@ -19,6 +20,7 @@ def test_swap_rate_flat_curve():
     expected_rate = 2 * (np.exp(0.05 / 2) - 1)
     assert s_rate == pytest.approx(expected_rate, rel=1e-5)
 
+
 def test_swap_pv_par_swap():
     curve = NelsonSiegelCurve(beta0=0.05, beta1=0.0, beta2=0.0, tau=1.0)
     # Create a swap with fixed rate = par rate
@@ -30,6 +32,7 @@ def test_swap_pv_par_swap():
 
     assert pv_receiver == pytest.approx(0.0, abs=1e-4)
     assert pv_payer == pytest.approx(0.0, abs=1e-4)
+
 
 def test_swap_pv_off_market():
     curve = NelsonSiegelCurve(beta0=0.05, beta1=0.0, beta2=0.0, tau=1.0)

@@ -1,5 +1,5 @@
-"""Unit tests for Caps, Floors, and Swaptions.
-"""
+"""Unit tests for Caps, Floors, and Swaptions."""
+
 import numpy as np
 import pytest
 
@@ -31,7 +31,7 @@ def test_cap_floor_parity():
     pv_floor = cap_floor_pv(floor, model, r_t)
 
     # Payer swap with fixed rate = strike
-    # curve is given by model's zcb_price. We need a wrapper to give continuous rate y(t)
+    # wrapper to derive continuous rate y(t) from model's zcb_price
     def curve(t):
         if t == 0:
             return r_t
@@ -71,7 +71,7 @@ def test_swaption_parity():
 
     # PV of forward starting payer swap
     # PV_forward_swap = PV_swap(t=0) - PV_swap_payments_before_expiry
-    # But since swap_pv calculates from t=0 to tenor, we need to subtract the payments up to expiry.
+    # swap_pv goes from t=0 to tenor, so subtract payments up to expiry
     def curve(t):
         if t == 0:
             return r_t
@@ -86,4 +86,6 @@ def test_swaption_parity():
 
     pv_forward_swap = pv_payer_full - pv_payer_short
 
-    assert (pv_payer_swaption - pv_receiver_swaption) == pytest.approx(pv_forward_swap, rel=1e-3, abs=1e-2)  # noqa: E501
+    assert (pv_payer_swaption - pv_receiver_swaption) == pytest.approx(
+        pv_forward_swap, rel=1e-3, abs=1e-2
+    )  # noqa: E501

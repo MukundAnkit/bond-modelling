@@ -1,8 +1,10 @@
 """Swaption pricing module."""
+
+from collections.abc import Callable
 from dataclasses import dataclass
 
-from scipy.optimize import root_scalar
 import numpy as np
+from scipy.optimize import root_scalar
 
 from src.derivatives.black import black_formula
 from src.derivatives.cap_floor import vasicek_zcb_option
@@ -12,20 +14,20 @@ from src.models.stochastic import VasicekModel
 
 @dataclass
 class Swaption:
-    """European Swaption.
-    """
+    """European Swaption."""
 
     swap: InterestRateSwap
     expiry: float
     option_type: str  # 'payer' or 'receiver'
 
-    def __post_init__(self):  # noqa: D105
+    def __post_init__(self) -> None:  # noqa: D105
         if self.option_type not in ["payer", "receiver"]:
             raise ValueError("option_type must be 'payer' or 'receiver'")
         if self.expiry <= 0.0:
             raise ValueError("Expiry must be strictly positive")
         if self.expiry >= self.swap.tenor:
             raise ValueError("Expiry must be before the underlying swap maturity")
+
 
 def price_swaption_jamshidian(
     swaption: Swaption, model: VasicekModel, r_t: float
@@ -40,7 +42,7 @@ def price_swaption_jamshidian(
         The Vasicek short-rate model.
     r_t : float
         Current short rate at time 0.
-        
+
     Returns
     -------
     float
@@ -74,14 +76,14 @@ def price_swaption_jamshidian(
     # 1. Find critical rate r* at expiry T such that the coupon bond price is 1.0
     T = swaption.expiry  # noqa: N806
 
-    def cb_price_at_T(r):  # noqa: N802
+    def cb_price_at_T(r: float) -> float:  # noqa: N802
         price = 0.0
         for ci, Ti in zip(c, payment_times, strict=False):  # noqa: N806
-            price += ci * model.zcb_price(r, Ti - T)
+            price += float(ci * model.zcb_price(r, Ti - T))
         return price - 1.0
 
     # Find root r*
-    res = root_scalar(cb_price_at_T, bracket=[-0.5, 0.5], method='brentq')
+    res = root_scalar(cb_price_at_T, bracket=[-0.5, 0.5], method="brentq")
     r_star = res.root
 
     # 2. Calculate individual strikes X_i = P(T, T_i; r*)
@@ -90,7 +92,7 @@ def price_swaption_jamshidian(
     # 3. Sum up the options on ZCBs
     # Payer Swaption = Put on coupon bond = sum( ci * Put(ZCB_i) )
     # Receiver Swaption = Call on coupon bond = sum( ci * Call(ZCB_i) )
-    opt_type = 'put' if swaption.option_type == 'payer' else 'call'
+    opt_type = "put" if swaption.option_type == "payer" else "call"
 
     pv = 0.0
     for ci, Ti, Xi in zip(c, payment_times, X, strict=False):  # noqa: N806
@@ -99,7 +101,10 @@ def price_swaption_jamshidian(
 
     return pv * swaption.swap.notional
 
-def price_swaption_black(swaption: Swaption, curve, vol: float) -> float:
+
+def price_swaption_black(
+    swaption: Swaption, curve: Callable[[float], float], vol: float
+) -> float:
     """Price a European Swaption using Black's (1976) model.
 
     Parameters
@@ -110,14 +115,15 @@ def price_swaption_black(swaption: Swaption, curve, vol: float) -> float:
         Continuous yield curve.
     vol : float
         Implied Black volatility (log-normal).
-        
+
     Returns
     -------
     float
         The PV of the Swaption.
+
     """
     dt = 1.0 / swaption.swap.freq
-    
+
     payment_times = []
     t = swaption.expiry + dt
     while t <= swaption.swap.tenor + 1e-6:
@@ -128,34 +134,31 @@ def price_swaption_black(swaption: Swaption, curve, vol: float) -> float:
         return 0.0
 
     # Calculate annuity A = sum(dt * Z_i)
-    A = 0.0  # noqa: N806
-    for Ti in payment_times:
-        yi = curve(Ti)
-        A += dt * np.exp(-yi * Ti)
-        
+    annuity = 0.0  # noqa: N806
+    for ti in payment_times:
+        yi = curve(ti)
+        annuity += dt * np.exp(-yi * ti)
+
     # Forward swap rate S = (Z_T - Z_Tn) / A
     y_expiry = curve(swaption.expiry)
-    Z_expiry = np.exp(-y_expiry * swaption.expiry)  # noqa: N806
-    
-    Tn = payment_times[-1]  # noqa: N806
-    y_Tn = curve(Tn)
-    Z_Tn = np.exp(-y_Tn * Tn)  # noqa: N806
-    
-    if A > 0:
-        S = (Z_expiry - Z_Tn) / A  # noqa: N806
-    else:
-        S = 0.0  # noqa: N806
-        
-    is_call = (swaption.option_type == 'payer')
-    
+    z_expiry = np.exp(-y_expiry * swaption.expiry)  # noqa: N806
+
+    tn = payment_times[-1]  # noqa: N806
+    y_tn = curve(tn)  # noqa: N806
+    z_tn = np.exp(-y_tn * tn)  # noqa: N806
+
+    s_fwd = (z_expiry - z_tn) / annuity if annuity > 0 else 0.0
+
+    is_call = swaption.option_type == "payer"
+
     # Swaption price = N * A * Black(S, K, vol)
     opt = black_formula(
-        F=S,
-        K=swaption.swap.fixed_rate,
-        T=swaption.expiry,
+        fwd=s_fwd,
+        strike=swaption.swap.fixed_rate,
+        t_exp=swaption.expiry,
         sigma=vol,
-        df=1.0,  # df is handled by A outside
-        is_call=is_call
+        df=1.0,  # df is handled by annuity outside
+        is_call=is_call,
     )
-    
-    return swaption.swap.notional * A * opt
+
+    return swaption.swap.notional * annuity * opt

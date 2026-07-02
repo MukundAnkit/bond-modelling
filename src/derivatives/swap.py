@@ -1,34 +1,34 @@
 """Interest rate swap implementation."""
+
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
 
-# Assuming the curve object provides a __call__(t) method that returns the continuous spot rate.
-# E.g., NelsonSiegelCurve
 
 @dataclass
 class InterestRateSwap:
-    """Plain Vanilla Interest Rate Swap.
-    """
+    """Plain Vanilla Interest Rate Swap."""
 
     notional: float
     fixed_rate: float
     tenor: float  # in years
-    freq: int = 2 # payments per year
+    freq: int = 2  # payments per year
 
-def swap_rate(swap: InterestRateSwap, curve) -> float:
-    """Calculate the par swap rate for the given swap structure and continuous yield curve.
-    
+
+def swap_rate(swap: InterestRateSwap, curve: Callable[[float], float]) -> float:
+    """Calculate the par swap rate for given swap structure and continuous yield curve.
+
     In a single-curve framework, the PV of the floating leg is Notional * (1 - Z(T)).
     The PV of a basis point on the fixed leg (PV01 / Notional) is sum(Z(t) * dt).
-    
+
     Parameters
     ----------
     swap : InterestRateSwap
         The swap structure (ignores the fixed_rate in the object).
     curve : callable
-        A curve object that can be called with time t (in years) to get continuous yield y(t).
-        
+        Returns continuous yield y(t) when called with time t (in years).
+
     Returns
     -------
     float
@@ -47,15 +47,17 @@ def swap_rate(swap: InterestRateSwap, curve) -> float:
         pv01 += z * dt
 
     # Discount factor at maturity
-    y_T = curve(swap.tenor)
-    z_T = np.exp(-y_T * swap.tenor)
+    y_T = curve(swap.tenor)  # noqa: N806
+    z_T = np.exp(-y_T * swap.tenor)  # noqa: N806
 
-    par_rate = (1.0 - z_T) / pv01
-    return par_rate
+    return float((1.0 - z_T) / pv01)
 
-def swap_pv(swap: InterestRateSwap, curve, position: str = "receiver") -> float:
+
+def swap_pv(
+    swap: InterestRateSwap, curve: Callable[[float], float], position: str = "receiver"
+) -> float:
     """Calculate the Present Value (PV) of the Interest Rate Swap.
-    
+
     Parameters
     ----------
     swap : InterestRateSwap
@@ -64,7 +66,7 @@ def swap_pv(swap: InterestRateSwap, curve, position: str = "receiver") -> float:
         Continuous yield curve.
     position : str
         "receiver" (receives fixed, pays float) or "payer" (pays fixed, receives float).
-        
+
     Returns
     -------
     float
@@ -90,6 +92,6 @@ def swap_pv(swap: InterestRateSwap, curve, position: str = "receiver") -> float:
     pv_floating = swap.notional * (1.0 - z_T)
 
     if position == "receiver":
-        return pv_fixed - pv_floating
+        return float(pv_fixed - pv_floating)
     else:
-        return pv_floating - pv_fixed
+        return float(pv_floating - pv_fixed)
