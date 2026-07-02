@@ -17,9 +17,7 @@ def test_hull_white_zcb():
     p_0_t = 1.0
     p_0_end = np.exp(-f * t_end)
 
-    zcb_price = model.zero_coupon_bond(
-        0.0, t_end, r_t=f, p_0_t=p_0_t, p_0_end=p_0_end
-    )
+    zcb_price = model.zero_coupon_bond(0.0, t_end, r_t=f, p_0_t=p_0_t, p_0_end=p_0_end)
     assert np.isclose(zcb_price, p_0_end, atol=1e-4)
 
     b_val = model.b_factor(0, t_end)

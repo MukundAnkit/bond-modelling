@@ -10,6 +10,7 @@ class TrinomialTree:
 
     pass
 
+
 class HWTree(TrinomialTree):
     """Hull-White Trinomial Tree."""
 

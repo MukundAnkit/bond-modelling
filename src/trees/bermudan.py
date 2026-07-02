@@ -1,6 +1,5 @@
 """Bermudan swaption pricing."""
 
-
 import numpy as np
 
 from .hull_white import HullWhite1F
