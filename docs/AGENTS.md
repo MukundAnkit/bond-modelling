@@ -37,7 +37,20 @@ Every feature or bug fix must follow this exact sequence:
 2. **[Inspect]**: The Agent analyzes existing code/context and reports missing context, ambiguities, or design constraints.
 3. **[Simulate]**: The Agent outputs a detailed `implementation_plan.md` (no implementation code allowed yet). The Human reviews and approves the plan.
 4. **[Patch Minimally]**: The Agent implements the minimal changes and writes corresponding unit tests.
-5. **[Verify]**: The Agent runs `uv run pytest`, `ruff check .`, and `mypy` in the local terminal sandbox. The Human reviews the final walkthrough and merges.
+5. **[Verify]**: The Agent runs the full verification suite below in the local terminal sandbox. The Human reviews the final walkthrough and merges.
+
+### Mandatory Pre-Commit Verification
+
+Before ANY commit (especially before pushing or opening a PR), the Agent MUST run these exact commands and confirm all pass:
+
+```bash
+uv run ruff check .
+uv run ruff format . --check
+uv run mypy src/
+PYTHONPATH=. uv run pytest -v --tb=short
+```
+
+If any command fails, the Agent MUST fix the issue before committing. Do not skip or defer any of these checks. This is the single most important rule to prevent CI failures.
 
 **Deterministic Break**: If the Agent's patch fails the sandbox test suite or linting more than twice, the Agent must halt execution, summarize the failure logs, and wait for Human intervention.
 
@@ -47,7 +60,7 @@ The Agent must conform to the established tooling defined in `docs/development_w
 
 - **Type Hinting**: Strict Python 3.10+ type hints are mandatory for all function signatures and complex variables. Use mypy-compatible syntax.
 - **Docstrings**: All functions, classes, and modules must use standard NumPy-style docstrings.
-- **Linting & Formatting**: Code must pass `ruff check .` and `ruff format .` without warnings.
+- **Linting, Formatting, Typing & Testing**: Code must pass the full pre-commit verification suite: `ruff check .`, `ruff format . --check`, `mypy src/`, and `pytest -v --tb=short`. No exceptions.
 - **Testing**: All features require corresponding unit tests in the `tests/` directory using `pytest`. Edge cases must be explicitly tested.
 - **Package Management**: The project uses `uv`. The Agent should not recommend `pip` or `poetry`.
 
@@ -66,8 +79,8 @@ When starting a new module or feature, follow this flow:
 
 **Phase C: Implementation & Verification (Agent in Sandbox)**
 1. Agent implements business logic to pass tests.
-2. Agent runs `uv run pytest`, `ruff check .`, and `mypy .` to verify a clean build.
-3. Agent commits passing, well-formatted code to the local feature branch as an implementation checkpoint.
+2. Agent runs the **full mandatory pre-commit verification** (see [Verify] step above): `ruff check .`, `ruff format . --check`, `mypy src/`, `pytest -v --tb=short`. All must pass.
+3. Agent commits passing, well-formatted, fully verified code to the local feature branch as an implementation checkpoint.
 4. Agent writes a `docs/walkthrough.md` summarizing changes and test runs.
 
 **Phase D: Review & Git Checkpoint (Human)**
@@ -77,8 +90,9 @@ When starting a new module or feature, follow this flow:
 1. Human reviews the walkthrough, the diff, and the implementation-level commits on the feature branch.
 2. Human runs final local checks if desired.
 3. Human removes feature-specific artifacts (`docs/implementation_plan.md`, `docs/walkthrough.md`) from the feature branch (`git rm docs/implementation_plan.md docs/walkthrough.md && git commit -m "chore: clean up feature artifacts"`).
-4. Human performs the final feature-level checkpointing (squash-merging the feature branch into `dev`).
-5. Human flushes the context window and opens a new session for the next feature.
+4. **PR Creation & Markdown Body Rule**: When creating Pull Requests via the `gh` CLI, the Agent MUST dynamically generate a fresh temporary file for the PR body (e.g., `/tmp/pr_body.md` or via standard input) immediately before execution. The Agent MUST NOT reference previously persisted artifacts (e.g., `scratch/pr_body.md`) as the `--body-file`, as they may contain stale data from previous iterations.
+5. Human performs the final feature-level checkpointing (squash-merging the feature branch into `dev`).
+6. Human flushes the context window and opens a new session for the next feature.
 
 5. Human-Agent Interaction & Token Hygiene Protocols
 
@@ -96,7 +110,7 @@ To maximize developer efficiency and minimize token utilization, the following r
 5.3 Token Hygiene Rules
 - **Precise Injections**: Avoid injecting entire repositories or folders. Use targeted file references with exact line numbers where possible.
 - **Immediate Session Flushing**: As soon as a feature branch is squash-merged, the Human should flush the active session to reset token accumulation.
-- **Structured Two-Strike Escapes**: If the sandbox test suite or linting fails twice, the Agent will stop looping and output:
+- **Structured Two-Strike Escapes**: If the sandbox verification (pre-commit suite) fails twice, the Agent will stop looping and output:
   1. The exact failing diff.
   2. The exact error output/logs.
   3. A list of 2-3 logical solutions or design decisions for the Human to choose from.

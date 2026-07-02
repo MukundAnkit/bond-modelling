@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-06-29 (v0.6.0 — Module 7: Stochastic Models complete)
+> Last updated: 2026-07-02 (v0.7.0 — Module 8: Interest Rate Derivatives complete)
 
 ---
 
@@ -55,8 +55,14 @@ bond_modelling/
 │   │   ├── bootstrap.py        #   Recursive spot-rate bootstrapping
 │   │   └── interpolate.py      #   Log-linear discount-factor interpolation
 │   ├── curve/          # Nelson-Siegel curve — COMPLETE
-│   │   ├── __init__.py
-│   │   └── nelson_siegel.py    #   Nelson-Siegel curve model & optimizer
+│   ├── __init__.py
+│   └── nelson_siegel.py    #   Nelson-Siegel curve model & optimizer
+├── derivatives/    # Derivatives pricing — COMPLETE
+│   ├── __init__.py
+│   ├── black.py            #   Black (1976) model formulas
+│   ├── swap.py             #   Vanilla Interest Rate Swaps
+│   ├── cap_floor.py        #   Caps & Floors (Vasicek & Black)
+│   └── swaption.py         #   Swaptions (Jamshidian's Trick & Black)
 │   ├── data/                   # Data source fetchers — COMPLETE
 │   │   ├── __init__.py
 │   │   ├── base.py             #   Base fetcher interface
@@ -115,7 +121,8 @@ bond_modelling/
     ├── 04-nelson-siegel-verification.ipynb              # Nelson-Siegel verification notebook
     ├── 05-portfolio-caching-verification.ipynb          # Portfolio & Caching verification notebook
     ├── 06-data-source-fetchers-exploration.ipynb        # Data Source fetchers notebook
-    └── 07-stochastic-simulation-verification.ipynb      # PCA and Stochastic Monte Carlo notebook
+    ├── 07-stochastic-simulation-verification.ipynb      # PCA and Stochastic Monte Carlo notebook
+    └── 08-derivatives-pricing-verification.ipynb        # Derivatives Pricing (Vasicek & Black)
 ```
 
 ---
@@ -131,7 +138,7 @@ bond_modelling/
 | PR template | Checklist with type tags + verification steps |
 | Workflow guide | See [`docs/development_workflow.md`](development_workflow.md) |
 | Latest release | [`v0.1.0`](https://github.com/MukundAnkit/bond-modelling/releases/tag/v0.1.0) — Module 1: Single Instrument Pricing |
-| Latest tag (unreleased) | `v0.6.0` — Module 7: Stochastic Models (on `dev`) |
+| Latest tag (unreleased) | `v0.7.0` — Module 8: Interest Rate Derivatives (on `dev`) |
 
 ---
 
@@ -148,6 +155,7 @@ bond_modelling/
 | Caching & Validation | **Complete** | JSONCache with TTL validation, cross_validate_yields comparing FRED vs yfinance. 6 tests. |
 | Data Integrations | **Complete** | FredFetcher, TreasuryFetcher, YFinanceFetcher, and FINRA mocks. |
 | Stochastic Models | **Complete** | PCA curve extraction, Vasicek/CIR models, calibration, Monte Carlo paths. |
+| Derivatives | **Complete** | Vanilla Swaps, Caps, Floors, Swaptions using Vasicek analytical and Black (1976) models. |
 
 ---
 
@@ -275,6 +283,26 @@ bond_modelling/
 
 ---
 
+## Derivatives — Implementation Details
+
+### `InterestRateSwap` (`src/derivatives/swap.py`)
+- Defines standard fixed-for-floating Interest Rate Swaps.
+- Computes fair Par Swap Rate via `swap_rate()`.
+- Values off-market swaps (payer or receiver) via `swap_pv()`.
+
+### `Cap` & `Floor` (`src/derivatives/cap_floor.py`)
+- Prices interest rate caps and floors across all individual caplets/floorlets.
+- Solved analytically under the Vasicek model via options on Zero-Coupon Bonds.
+- Solved via market-standard Black's 1976 model using `cap_floor_black`.
+- Put-Call Parity verified: Cap - Floor = Forward Payer Swap.
+
+### `Swaption` (`src/derivatives/swaption.py`)
+- Represents European options to enter a swap at expiry.
+- Priced under the Vasicek model analytically utilizing **Jamshidian's Trick** (decomposing the swaption into a portfolio of ZCB options).
+- Priced under Black's 1976 model using the forward swap rate and annuity.
+
+---
+
 ## Test Results
 
 ```
@@ -301,9 +329,9 @@ Per the Execution Protocol in the MRD, development must proceed in order:
 2. ~~Risk (Sensitivity — complete)~~
 3. ~~Bootstrap (Term Structure — complete)~~
 4. ~~Curve (Continuous Optimization — complete)~~
-
 5. ~~Portfolio Analytics (Aggregation — complete)~~
 6. ~~Data Source Fetchers (FRED, yfinance — complete)~~
 7. ~~Stochastic Rate Models (PCA, Vasicek, CIR — complete)~~
+8. ~~Interest Rate Derivatives (Swaps, Caps/Floors, Swaptions — complete)~~
 
 Next Steps: Project Complete. Further enhancements to be decided (e.g., credit risk modeling, MBS prepayments).
