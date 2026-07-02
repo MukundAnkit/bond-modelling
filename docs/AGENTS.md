@@ -115,6 +115,11 @@ To maximize developer efficiency and minimize token utilization, the following r
   2. The exact error output/logs.
   3. A list of 2-3 logical solutions or design decisions for the Human to choose from.
 
+5.4 Proactive Command Permissions
+- **When**: At the start of a session, or immediately prior to invoking autonomous subagents.
+- **Action**: The Agent MUST proactively use the `ask_permission` tool (Action: `command`) to request session-wide execution permissions for core workflow prefixes: `uv`, `git`, and `gh`.
+- **Goal**: Eliminate redundant user approval prompts for routine linting, testing, formatting, and branch management tasks during high-autonomy execution phases.
+
 6. Specialized Subagent Architecture
 
 When tackling mathematically complex implementation stages, the primary agent can spawn specialized subagents to isolate tasks.
