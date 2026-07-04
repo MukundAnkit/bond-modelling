@@ -1,6 +1,7 @@
-import pytest
 import numpy as np
+
 from src.structured.frn import FloatingRateNote
+
 
 def test_frn_pricing_at_par():
     # If the quoted margin equals the discount margin, and reference rate is constant,
@@ -10,11 +11,12 @@ def test_frn_pricing_at_par():
         reference_rate=0.05,
         quoted_margin=0.01,
         payment_frequency=2,
-        maturity_years=5.0
+        maturity_years=5.0,
     )
     # Assuming discount_margin = quoted_margin = 0.01
     price = frn.price(discount_margin=0.01)
     np.testing.assert_almost_equal(price, 100.0, decimal=2)
+
 
 def test_frn_with_margin():
     # If DM > QM, the price should be below par
@@ -23,10 +25,11 @@ def test_frn_with_margin():
         reference_rate=0.05,
         quoted_margin=0.01,
         payment_frequency=2,
-        maturity_years=5.0
+        maturity_years=5.0,
     )
     price = frn.price(discount_margin=0.02)
     assert price < 100.0
+
 
 def test_frn_negative_rates():
     # Test FRN pricing behavior with negative reference rate and a zero floor
@@ -37,7 +40,7 @@ def test_frn_negative_rates():
         payment_frequency=2,
         maturity_years=5.0,
         has_floor=True,
-        floor_rate=0.0
+        floor_rate=0.0,
     )
     # The coupon is max(-0.01 + 0.01, 0.0) = 0.0
     price = frn.price(discount_margin=0.0)
