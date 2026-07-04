@@ -3,10 +3,13 @@
 from src.portfolio.portfolio import Portfolio
 from src.portfolio.position import Position
 from src.portfolio.var import (
+    cornish_fisher_expected_shortfall,
+    cornish_fisher_var,
+    full_revaluation_pnl,
+    full_revaluation_var,
     historical_expected_shortfall,
     historical_var,
-    parametric_expected_shortfall,
-    parametric_var,
+    pot_expected_shortfall,
 )
 
 __all__ = [
@@ -14,6 +17,9 @@ __all__ = [
     "Position",
     "historical_var",
     "historical_expected_shortfall",
-    "parametric_var",
-    "parametric_expected_shortfall",
+    "full_revaluation_pnl",
+    "full_revaluation_var",
+    "cornish_fisher_var",
+    "cornish_fisher_expected_shortfall",
+    "pot_expected_shortfall",
 ]

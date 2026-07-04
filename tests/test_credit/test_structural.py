@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.credit.structural import MertonModel
+from src.credit.structural import MertonJumpDiffusionModel, MertonModel
 
 
 def test_merton_model_equity():
@@ -49,3 +49,29 @@ def test_credit_spread():
     # Wait, we can just check if spread is positive and reasonable
     assert spread > 0
     assert spread < 0.10
+
+
+def test_merton_jump_diffusion_equity():
+    model = MertonJumpDiffusionModel(
+        V=100.0,
+        D=80.0,
+        T=1.0,
+        r=0.05,
+        sigma_V=0.20,
+        lambda_j=0.5,
+        mu_j=-0.1,
+        sigma_j=0.3,
+    )
+
+    equity = model.equity_value()
+    debt_val = model.debt_value()
+
+    assert equity > 0
+    assert debt_val > 0
+    assert equity + debt_val == pytest.approx(100.0)
+
+    base_model = MertonModel(V=100.0, D=80.0, T=1.0, r=0.05, sigma_V=0.20)
+    base_equity = base_model.equity_value()
+
+    # Due to increased tail risk, equity (call option) is more valuable
+    assert equity > base_equity

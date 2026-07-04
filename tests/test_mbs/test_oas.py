@@ -1,7 +1,13 @@
 import numpy as np
 
-from mbs.oas import calculate_oas, price_mbs
+from mbs.oas import calculate_oas, generate_hw1f_paths, price_mbs
 from mbs.pass_through import project_cash_flows
+
+
+def test_generate_hw1f_paths():
+    paths = generate_hw1f_paths(0.05, 0.1, 0.01, 10, 120, 1.0 / 12.0, 0.05)
+    assert paths.shape == (10, 120)
+    assert np.allclose(paths[:, 0], 0.05)
 
 
 def test_price_mbs():
@@ -20,7 +26,7 @@ def test_calculate_oas():
     rate_paths = np.full((5, term), 0.04)
 
     def dummy_prepay(_rate_path, _wac):
-        return np.zeros(term)
+        return lambda t, pf: 0.0
 
     cf = project_cash_flows(balance, wac, term, np.zeros(term))["total_cash_flow"]
     expected_oas = 0.015

@@ -1,5 +1,6 @@
 """Structural Credit Models (Merton)."""
 
+import math
 from dataclasses import dataclass
 
 import numpy as np
@@ -140,3 +141,70 @@ class MertonModel:
             return float("inf")
 
         return float(-(1.0 / self.T) * np.log(debt / risk_free_debt))
+
+
+@dataclass
+class MertonJumpDiffusionModel(MertonModel):
+    """Merton (1976) Jump-Diffusion Credit Model.
+
+    Models a firm's asset value process as a jump-diffusion (Brownian motion + Poisson jumps).
+
+    Parameters
+    ----------
+    V : float
+        Current market value of the firm's assets.
+    D : float
+        Face value of the firm's zero-coupon debt.
+    T : float
+        Time to maturity of the debt in years.
+    r : float
+        Risk-free interest rate (continuous).
+    sigma_V : float
+        Volatility of the continuous component of firm's asset value.
+    lambda_j : float
+        Expected number of jumps per year.
+    mu_j : float
+        Mean of the jump size in log returns.
+    sigma_j : float
+        Volatility of the jump size.
+
+    """
+
+    lambda_j: float = 0.0
+    mu_j: float = 0.0
+    sigma_j: float = 0.0
+
+    def equity_value(self, n_terms: int = 50) -> float:
+        """Calculate the market value of the firm's equity under Jump-Diffusion."""
+        if self.lambda_j == 0.0:
+            return super().equity_value()
+
+        k = np.exp(self.mu_j + 0.5 * self.sigma_j**2) - 1.0
+        lambda_prime = self.lambda_j * (1.0 + k)
+
+        call_price = 0.0
+        for n in range(n_terms):
+            prob = (
+                np.exp(-lambda_prime * self.T)
+                * (lambda_prime * self.T) ** n
+                / math.factorial(n)
+            )
+
+            sigma_n = np.sqrt(self.sigma_V**2 + n * self.sigma_j**2 / self.T)
+            r_n = (
+                self.r
+                - self.lambda_j * k
+                + n * (self.mu_j + 0.5 * self.sigma_j**2) / self.T
+            )
+
+            d1 = (np.log(self.V / self.D) + (r_n + 0.5 * sigma_n**2) * self.T) / (
+                sigma_n * np.sqrt(self.T)
+            )
+            d2 = d1 - sigma_n * np.sqrt(self.T)
+
+            bs_call = self.V * norm.cdf(d1) - self.D * np.exp(-r_n * self.T) * norm.cdf(
+                d2
+            )
+            call_price += prob * bs_call
+
+        return float(call_price)

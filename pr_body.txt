@@ -1,0 +1,26 @@
+## Summary
+
+Complete quantitative overhaul (Phases 1-3) integrating advanced pricing and risk models.
+
+## Type
+
+- [x] feat — new feature
+- [ ] fix — bug fix
+- [ ] test — test changes
+- [ ] docs — documentation
+- [x] refactor — code restructuring
+- [ ] chore — tooling / config
+
+## Verification
+
+- [x] Tests pass locally: `uv run pytest`
+- [x] New tests added for any new functionality
+
+## Description
+
+This PR introduces the complete quantitative overhaul executed across 3 phases:
+- **Phase 1**: Global Multi-Curve Solver, Monotone Convex Splines, AFNS, Shifted-Stochastic Models.
+- **Phase 2**: SABR & Bachelier integration, Algorithmic Adjoint Differentiation (AAD), Predictor-Corrector LMM.
+- **Phase 3**: Wrong-Way Risk Copulas, KVA/FVA Asymmetry, ISDA CDS Model, Jump-Diffusions, Stochastic Prepayment OAS, Full Revaluation VaR, EVT Expected Shortfall.
+
+All 250 unit tests are passing and all verification notebooks have been computationally executed and saved in-place.
