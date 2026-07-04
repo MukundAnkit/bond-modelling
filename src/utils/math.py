@@ -135,3 +135,50 @@ def bisection(
             f_low = f_mid
 
     raise RuntimeError("Bisection did not converge")
+
+import numpy as np
+
+def jacobian_central_difference(
+    func: Callable[[np.ndarray], np.ndarray], x: np.ndarray, eps: float = 1e-6
+) -> np.ndarray:
+    """Approximate the Jacobian matrix using central difference."""
+    n = len(x)
+    m = len(func(x))
+    J = np.zeros((m, n))
+    for i in range(n):
+        x_plus = x.copy()
+        x_minus = x.copy()
+        x_plus[i] += eps
+        x_minus[i] -= eps
+        J[:, i] = (func(x_plus) - func(x_minus)) / (2 * eps)
+    return J
+
+def newton_raphson_multi(
+    func: Callable[[np.ndarray], np.ndarray],
+    guess: np.ndarray,
+    jac: Callable[[np.ndarray], np.ndarray] | None = None,
+    tol: float = TOLERANCE,
+    max_iter: int = MAX_ITER,
+) -> np.ndarray:
+    """Find a root of a multivariate function using the Newton-Raphson method."""
+    x = np.asarray(guess, dtype=float)
+    for _ in range(max_iter):
+        f = func(x)
+        if np.linalg.norm(f, ord=np.inf) < tol:
+            return x
+        
+        J = jac(x) if jac is not None else jacobian_central_difference(func, x)
+        
+        try:
+            dx = np.linalg.solve(J, -f)
+        except np.linalg.LinAlgError:
+            # Fallback to least squares if singular
+            dx, _, _, _ = np.linalg.lstsq(J, -f, rcond=None)
+            
+        x += dx
+        if np.linalg.norm(dx, ord=np.inf) < 1e-12:
+            break
+            
+    if np.linalg.norm(func(x), ord=np.inf) >= tol:
+        raise RuntimeError("Multivariate Newton-Raphson did not converge")
+    return x

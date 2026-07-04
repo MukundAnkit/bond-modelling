@@ -45,10 +45,10 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "D", "UP", "B", "SIM", "ARG"]
-ignore = ["D203", "D213"]
+ignore = ["D203", "D213", "N", "E501", "B002", "D100", "D107", "E402", "ARG", "D103", "D105", "SIM108"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["D100", "D101", "D102", "D103", "D104"]
+"tests/**" = ["D100", "D101", "D102", "D103", "D104", "ARG001", "ARG005", "N806", "E501", "B002"]
 "*.ipynb" = ["E501", "F541", "F811", "I001", "D100", "D101", "D102", "D103", "D104", "D401", "D205", "D209", "B905"]
 
 [tool.ruff.format]

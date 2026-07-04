@@ -3,10 +3,9 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 
-import numpy as np
 from scipy.optimize import root_scalar
 
-from src.derivatives.black import black_formula
+from src.derivatives import aad
 from src.derivatives.cap_floor import vasicek_zcb_option
 from src.derivatives.swap import InterestRateSwap
 from src.models.stochastic import VasicekModel
@@ -102,19 +101,28 @@ def price_swaption_jamshidian(
     return pv * swaption.swap.notional
 
 
-def price_swaption_black(
-    swaption: Swaption, curve: Callable[[float], float], vol: float
+def price_swaption_bachelier(
+    swaption: Swaption,
+    discount_curve: Callable[[float], float],
+    forward_curve: Callable[[float], float] | None = None,
+    vol: float = 0.0,
+    sabr_params: dict | None = None,
 ) -> float:
-    """Price a European Swaption using Black's (1976) model.
+    """Price a European Swaption using Bachelier and SABR models.
 
     Parameters
     ----------
     swaption : Swaption
         The swaption to price.
-    curve : callable
-        Continuous yield curve.
-    vol : float
-        Implied Black volatility (log-normal).
+    discount_curve : callable
+        Continuous yield curve for discounting.
+    forward_curve : callable, optional
+        Continuous yield curve for forward rates. Defaults to discount_curve.
+    vol : float, optional
+        Normal implied volatility (used if sabr_params is None).
+    sabr_params : dict, optional
+        Dictionary with keys 'alpha', 'rho', 'nu' for SABR model. If provided,
+        vol is computed using the SABR normal volatility formula.
 
     Returns
     -------
@@ -122,8 +130,10 @@ def price_swaption_black(
         The PV of the Swaption.
 
     """
-    dt = 1.0 / swaption.swap.freq
+    if forward_curve is None:
+        forward_curve = discount_curve
 
+    dt = 1.0 / swaption.swap.freq
     payment_times = []
     t = swaption.expiry + dt
     while t <= swaption.swap.tenor + 1e-6:
@@ -133,30 +143,57 @@ def price_swaption_black(
     if not payment_times:
         return 0.0
 
-    # Calculate annuity A = sum(dt * Z_i)
-    annuity = 0.0  # noqa: N806
+    # Calculate annuity A = sum(dt * Z_i_d)
+    annuity = 0.0
+    float_pv = 0.0
+
+    t_prev = swaption.expiry
     for ti in payment_times:
-        yi = curve(ti)
-        annuity += dt * np.exp(-yi * ti)
+        yi_d = discount_curve(ti)
+        z_d = aad.exp(-yi_d * ti)
+        annuity += dt * z_d
 
-    # Forward swap rate S = (Z_T - Z_Tn) / A
-    y_expiry = curve(swaption.expiry)
-    z_expiry = np.exp(-y_expiry * swaption.expiry)  # noqa: N806
+        # Forward rate implied from forward_curve
+        y_f_prev = forward_curve(t_prev)
+        z_f_prev = aad.exp(-y_f_prev * t_prev)
 
-    tn = payment_times[-1]  # noqa: N806
-    y_tn = curve(tn)  # noqa: N806
-    z_tn = np.exp(-y_tn * tn)  # noqa: N806
+        y_f = forward_curve(ti)
+        z_f = aad.exp(-y_f * ti)
 
-    s_fwd = (z_expiry - z_tn) / annuity if annuity > 0 else 0.0
+        if float(z_f) > 0:
+            fwd_rate = (z_f_prev / z_f - 1.0) / dt
+        else:
+            fwd_rate = 0.0
+
+        float_pv += fwd_rate * dt * z_d
+        t_prev = ti
+
+    s_fwd = float_pv / annuity if annuity > 0 else 0.0
+
+    # Calculate implied volatility
+    if sabr_params is not None:
+        from src.derivatives.sabr import sabr_normal_vol
+        implied_vol = sabr_normal_vol(
+            fwd=s_fwd,
+            strike=swaption.swap.fixed_rate,
+            t_exp=swaption.expiry,
+            alpha=sabr_params.get("alpha", vol),
+            rho=sabr_params.get("rho", 0.0),
+            nu=sabr_params.get("nu", 0.1),
+        )
+    else:
+        implied_vol = vol
 
     is_call = swaption.option_type == "payer"
 
-    # Swaption price = N * A * Black(S, K, vol)
-    opt = black_formula(
+    # Swaption price = N * A * Bachelier(S, K, vol_N)
+    from src.derivatives.bachelier import bachelier_formula
+
+    opt = bachelier_formula(
         fwd=s_fwd,
         strike=swaption.swap.fixed_rate,
         t_exp=swaption.expiry,
-        sigma=vol,
+        vol=implied_vol,
         df=1.0,  # df is handled by annuity outside
         is_call=is_call,
     )

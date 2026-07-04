@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 
-import numpy as np
+from src.derivatives import aad
 
 
 @dataclass
@@ -16,82 +16,135 @@ class InterestRateSwap:
     freq: int = 2  # payments per year
 
 
-def swap_rate(swap: InterestRateSwap, curve: Callable[[float], float]) -> float:
-    """Calculate the par swap rate for given swap structure and continuous yield curve.
+def swap_rate(
+    swap: InterestRateSwap,
+    discount_curve: Callable[[float], float],
+    forward_curve: Callable[[float], float] | None = None,
+):
+    """Calculate the par swap rate for given swap structure and continuous yield curves.
 
-    In a single-curve framework, the PV of the floating leg is Notional * (1 - Z(T)).
-    The PV of a basis point on the fixed leg (PV01 / Notional) is sum(Z(t) * dt).
+    In a multi-curve framework, the forward rate is determined by the forward_curve,
+    and the cashflows are discounted using the discount_curve.
 
     Parameters
     ----------
     swap : InterestRateSwap
         The swap structure (ignores the fixed_rate in the object).
-    curve : callable
-        Returns continuous yield y(t) when called with time t (in years).
+    discount_curve : callable
+        Returns continuous yield y(t) for discounting when called with time t (in years).
+    forward_curve : callable, optional
+        Returns continuous yield y(t) for forward rate estimation. Defaults to discount_curve.
 
     Returns
     -------
-    float
+    float or Dual
         The par swap rate (annualized).
 
     """
+    if forward_curve is None:
+        forward_curve = discount_curve
+
     dt = 1.0 / swap.freq
     periods = int(swap.tenor * swap.freq)
 
     pv01 = 0.0
+    float_pv = 0.0
+
     for i in range(1, periods + 1):
         t = i * dt
-        y = curve(t)
-        # Discount factor Z(t) = exp(-y * t)
-        z = np.exp(-y * t)
-        pv01 += z * dt
+        t_prev = (i - 1) * dt
 
-    # Discount factor at maturity
-    y_T = curve(swap.tenor)  # noqa: N806
-    z_T = np.exp(-y_T * swap.tenor)  # noqa: N806
+        # Discount factor Z(t) from discount_curve
+        y_d = discount_curve(t)
+        z_d = aad.exp(-y_d * t)
 
-    return float((1.0 - z_T) / pv01)
+        pv01 += z_d * dt
+
+        # Forward rate implied from forward_curve
+        if i == 1:
+            z_f_prev = 1.0
+        else:
+            y_f_prev = forward_curve(t_prev)
+            z_f_prev = aad.exp(-y_f_prev * t_prev)
+
+        y_f = forward_curve(t)
+        z_f = aad.exp(-y_f * t)
+
+        if float(z_f) > 0:
+            fwd_rate = (z_f_prev / z_f - 1.0) / dt
+        else:
+            fwd_rate = 0.0
+
+        float_pv += fwd_rate * dt * z_d
+
+    return float(float_pv / pv01)
 
 
 def swap_pv(
-    swap: InterestRateSwap, curve: Callable[[float], float], position: str = "receiver"
-) -> float:
+    swap: InterestRateSwap,
+    discount_curve: Callable[[float], float],
+    forward_curve: Callable[[float], float] | None = None,
+    position: str = "receiver",
+):
     """Calculate the Present Value (PV) of the Interest Rate Swap.
 
     Parameters
     ----------
     swap : InterestRateSwap
         The swap to price.
-    curve : callable
-        Continuous yield curve.
+    discount_curve : callable
+        Continuous yield curve for discounting.
+    forward_curve : callable, optional
+        Continuous yield curve for forward rates. Defaults to discount_curve.
     position : str
         "receiver" (receives fixed, pays float) or "payer" (pays fixed, receives float).
 
     Returns
     -------
-    float
+    float or Dual
         The net present value of the swap from the perspective of the chosen position.
 
     """
     if position not in ["receiver", "payer"]:
         raise ValueError("Position must be 'receiver' or 'payer'.")
 
+    if forward_curve is None:
+        forward_curve = discount_curve
+
     dt = 1.0 / swap.freq
     periods = int(swap.tenor * swap.freq)
 
     pv_fixed = 0.0
+    pv_floating = 0.0
+
     for i in range(1, periods + 1):
         t = i * dt
-        y = curve(t)
-        z = np.exp(-y * t)
-        pv_fixed += swap.notional * swap.fixed_rate * dt * z
+        t_prev = (i - 1) * dt
 
-    # Floating leg PV in a single-curve framework
-    y_T = curve(swap.tenor)  # noqa: N806
-    z_T = np.exp(-y_T * swap.tenor)  # noqa: N806
-    pv_floating = swap.notional * (1.0 - z_T)
+        # Discount factor Z(t) from discount_curve
+        y_d = discount_curve(t)
+        z_d = aad.exp(-y_d * t)
+
+        pv_fixed += swap.notional * swap.fixed_rate * dt * z_d
+
+        # Forward rate implied from forward_curve
+        if i == 1:
+            z_f_prev = 1.0
+        else:
+            y_f_prev = forward_curve(t_prev)
+            z_f_prev = aad.exp(-y_f_prev * t_prev)
+
+        y_f = forward_curve(t)
+        z_f = aad.exp(-y_f * t)
+
+        if float(z_f) > 0:
+            fwd_rate = (z_f_prev / z_f - 1.0) / dt
+        else:
+            fwd_rate = 0.0
+
+        pv_floating += swap.notional * fwd_rate * dt * z_d
 
     if position == "receiver":
-        return float(pv_fixed - pv_floating)
+        return pv_fixed - pv_floating
     else:
-        return float(pv_floating - pv_fixed)
+        return pv_floating - pv_fixed

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.stats import norm
 
-from src.derivatives.black import black_formula
+from src.derivatives import aad
 from src.models.stochastic import VasicekModel
 
 
@@ -141,19 +141,28 @@ def cap_floor_pv(instrument: Cap | Floor, model: VasicekModel, r_t: float) -> fl
     return pv
 
 
-def cap_floor_black(
-    instrument: Cap | Floor, curve: Callable[[float], float], vol: float
+def cap_floor_bachelier(
+    instrument: Cap | Floor,
+    discount_curve: Callable[[float], float],
+    forward_curve: Callable[[float], float] | None = None,
+    vol: float = 0.0,
+    sabr_params: dict | None = None,
 ) -> float:
-    """Price a Cap or Floor using Black's (1976) model.
+    """Price a Cap or Floor using Bachelier and SABR models.
 
     Parameters
     ----------
     instrument : Cap | Floor
         The instrument to price.
-    curve : callable
-        Continuous yield curve.
-    vol : float
-        Implied Black volatility (log-normal).
+    discount_curve : callable
+        Continuous yield curve for discounting.
+    forward_curve : callable, optional
+        Continuous yield curve for forward rates. Defaults to discount_curve.
+    vol : float, optional
+        Normal implied volatility (used if sabr_params is None).
+    sabr_params : dict, optional
+        Dictionary with keys 'alpha', 'rho', 'nu' for SABR model. If provided,
+        vol is computed using the SABR normal volatility formula.
 
     Returns
     -------
@@ -161,32 +170,53 @@ def cap_floor_black(
         The PV of the Cap or Floor.
 
     """
+    if forward_curve is None:
+        forward_curve = discount_curve
+
     dt = 1.0 / instrument.freq
     periods = int(instrument.tenor * instrument.freq)
 
     pv = 0.0
 
+    from src.derivatives.bachelier import bachelier_formula
+
     for i in range(1, periods + 1):
         T1 = (i - 1) * dt  # noqa: N806
         T2 = i * dt  # noqa: N806
 
-        y1 = curve(T1)
-        z1 = np.exp(-y1 * T1)
-        y2 = curve(T2)
-        z2 = np.exp(-y2 * T2)
+        y1_f = forward_curve(T1)
+        z1_f = aad.exp(-y1_f * T1)
+        y2_f = forward_curve(T2)
+        z2_f = aad.exp(-y2_f * T2)
 
-        # Forward LIBOR rate for [T1, T2]
-        fwd = (z1 / z2 - 1.0) / dt if z2 > 0 else 0.0  # noqa: N806
+        # Forward LIBOR rate for [T1, T2] from forward_curve
+        fwd = (z1_f / z2_f - 1.0) / dt if float(z2_f) > 0 else 0.0  # noqa: N806
 
-        df = z2 * dt
+        y2_d = discount_curve(T2)
+        z2_d = aad.exp(-y2_d * T2)
+        df = z2_d * dt
+
+        # Calculate implied volatility
+        if sabr_params is not None:
+            from src.derivatives.sabr import sabr_normal_vol
+            implied_vol = sabr_normal_vol(
+                fwd=fwd,
+                strike=instrument.strike,
+                t_exp=T1,
+                alpha=sabr_params.get("alpha", vol),
+                rho=sabr_params.get("rho", 0.0),
+                nu=sabr_params.get("nu", 0.1),
+            )
+        else:
+            implied_vol = vol
 
         is_cap = isinstance(instrument, Cap)
         # Caplet is a call on the forward rate, Floorlet is a put
-        pv += instrument.notional * black_formula(
+        pv += instrument.notional * bachelier_formula(
             fwd=fwd,
             strike=instrument.strike,
             t_exp=T1,  # expiry is T1
-            sigma=vol,
+            vol=implied_vol,
             df=df,
             is_call=is_cap,
         )

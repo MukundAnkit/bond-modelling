@@ -23,3 +23,18 @@ def test_simulate_exposures():
 
     assert pfe.shape == (3,)
     assert np.all(pfe >= ee)
+
+
+def test_simulate_exposures_with_margin():
+    mtm_paths = np.array([
+        [10.0, 20.0, -10.0, 30.0], 
+        [5.0, 15.0, 5.0, 25.0]
+    ])
+    im_paths = np.array([
+        [2.0, 2.0, 2.0, 2.0],
+        [1.0, 1.0, 1.0, 1.0]
+    ])
+    
+    ee, pfe, ene = simulate_exposures(mtm_paths, mpor_steps=1, im_paths=im_paths)
+    np.testing.assert_almost_equal(ee, [6.0, 8.5, 0.0, 28.5])
+    np.testing.assert_almost_equal(ene, [0.0, 0.0, -20.0, 0.0])

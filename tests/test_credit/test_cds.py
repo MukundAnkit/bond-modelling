@@ -1,9 +1,18 @@
 """Unit tests for Credit Default Swaps (CDS)."""
 
+import datetime
+
 import numpy as np
 import pytest
 
-from src.credit.cds import CDS, cds_par_spread, cds_premium_leg, cds_protection_leg
+from src.credit.cds import (
+    CDS,
+    cds_par_spread,
+    cds_premium_leg,
+    cds_protection_leg,
+    isda_par_spread,
+    isda_upfront_charge,
+)
 
 
 def test_cds_premium_leg():
@@ -79,3 +88,51 @@ def test_cds_par_spread():
     # Par Spread approx = lambda * (1 - R)
     # 0.02 * (1 - 0.4) = 0.012 = 120 bps
     assert par_spread == pytest.approx(0.012, rel=5e-2)
+
+
+def test_isda_cds_model():
+    valuation_date = datetime.date(2023, 9, 15)
+    effective_date = datetime.date(2023, 9, 16)
+    maturity_date = datetime.date(2028, 12, 20)
+
+    def curve(t):
+        return 0.03  # flat 3% curve
+
+    recovery_rate = 0.40
+    notional = 10_000_000
+
+    # Standard coupon 100 bps
+    standard_coupon = 0.01
+
+    # Quoted par spread 120 bps
+    quoted_par_spread = 0.0120
+
+    upfront = isda_upfront_charge(
+        valuation_date,
+        effective_date,
+        maturity_date,
+        quoted_par_spread,
+        standard_coupon,
+        curve,
+        recovery_rate,
+        notional,
+    )
+
+    # The upfront charge should be roughly positive (protection buyer pays upfront)
+    # since par spread (120 bps) > standard coupon (100 bps)
+    assert upfront > 0
+
+    # Convert back to par spread
+    implied_par = isda_par_spread(
+        valuation_date,
+        effective_date,
+        maturity_date,
+        upfront,
+        standard_coupon,
+        curve,
+        recovery_rate,
+        notional,
+    )
+
+    assert implied_par == pytest.approx(quoted_par_spread, rel=1e-5)
+
