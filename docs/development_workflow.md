@@ -118,7 +118,8 @@ Before merging any PR:
 - [ ] All tests pass: `uv run pytest`
 - [ ] New functionality has corresponding tests
 - [ ] If a module is completed, notebook verification has been run
-- [ ] For `dev` → `main` merges: update `docs/project_status.md`
+- [ ] Consolidated output rebuilt (`output/consolidated.html` and `output/consolidated.ipynb` are up to date with source notebooks)
+- [ ] `docs/project_status.md` updated (module progress, test counts, "Last updated" date)
 
 ---
 

@@ -52,6 +52,43 @@ PYTHONPATH=. uv run pytest -v --tb=short
 
 If any command fails, the Agent MUST fix the issue before committing. Do not skip or defer any of these checks. This is the single most important rule to prevent CI failures.
 
+### Consolidated Output Regeneration
+
+After a feature update that modifies any source notebook or Python source, the consolidated output must be rebuilt before merging into `dev`. This ensures `output/consolidated.html` stays in sync with the individual notebooks.
+
+The process:
+
+1. **Execute all source notebooks** (if they haven't been executed already):
+   ```bash
+   for nb in notebooks/*.ipynb; do
+     uv run jupyter nbconvert --to notebook --execute --inplace "$nb"
+   done
+   ```
+
+2. **Merge into consolidated notebook** using `nbmerge` (order is determined by numerical prefix):
+   ```bash
+   uv run nbmerge -o output/consolidated.ipynb notebooks/*.ipynb
+   ```
+
+3. **Execute the consolidated notebook** to populate output cells:
+   ```bash
+   uv run jupyter nbconvert --to notebook --execute --inplace output/consolidated.ipynb
+   ```
+
+4. **Convert to HTML**:
+   ```bash
+   uv run jupyter nbconvert --to html output/consolidated.ipynb
+   ```
+
+5. **Update project status** in `docs/project_status.md` — bump "Last updated" date, update module/feature status and test counts.
+
+6. **Stage all generated files**:
+   ```bash
+   git add output/consolidated.ipynb output/consolidated.html docs/project_status.md
+   ```
+
+This step should be performed during **Phase C** after the verification suite passes and before committing.
+
 **Deterministic Break**: If the Agent's patch fails the sandbox test suite or linting more than twice, the Agent must halt execution, summarize the failure logs, and wait for Human intervention.
 
 3. Strict Coding Standards & Tooling
@@ -89,7 +126,7 @@ When starting a new module or feature, follow this flow:
 
 1. Human reviews the walkthrough, the diff, and the implementation-level commits on the feature branch.
 2. Human runs final local checks if desired.
-3. Human removes feature-specific artifacts (`docs/implementation_plan.md`, `docs/walkthrough.md`) from the feature branch (`git rm docs/implementation_plan.md docs/walkthrough.md && git commit -m "chore: clean up feature artifacts"`).
+3. Human removes feature-specific artifacts (`docs/implementation_plan.md`, `docs/walkthrough.md`) from the feature branch (`git rm docs/implementation_plan.md docs/walkthrough.md && git commit -m "chore: clean up feature artifacts"`). If any higher-level plan or roadmap docs in `docs/` have been fully completed or rendered obsolete by this feature, move them to `docs/archive/` (`mkdir -p docs/archive && git mv docs/<file>.md docs/archive/`).
 4. **PR Creation & Markdown Body Rule**: When creating Pull Requests via the `gh` CLI, the Agent MUST dynamically generate a fresh temporary file for the PR body (e.g., `/tmp/pr_body.md` or via standard input) immediately before execution. The Agent MUST NOT reference previously persisted artifacts (e.g., `scratch/pr_body.md`) as the `--body-file`, as they may contain stale data from previous iterations.
 5. Human performs the final feature-level checkpointing (squash-merging the feature branch into `dev`).
 6. Human flushes the context window and opens a new session for the next feature.

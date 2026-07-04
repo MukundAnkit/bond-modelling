@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-07-02 (v0.14.0 — Module 16: XVA complete)
+> Last updated: 2026-07-04
 
 ---
 
@@ -32,9 +32,12 @@ bond_modelling/
 │   │   └── ci.yml              # GitHub Actions — auto-run tests on push/PR
 │   └── pull_request_template.md
 ├── docs/
-│   ├── project_plan.md            # MRD — full specification
+│   ├── archive/
+│   │   ├── project_plan.md              # MRD — archived (completed)
+│   │   └── fixed_income_analytics_roadmap.md  # Archived (completed)
 │   ├── project_status.md          # This file — current state
-│   └── development_workflow.md    # Branching, commits, PR practices
+│   ├── development_workflow.md    # Branching, commits, PR practices
+│   └── AGENTS.md                  # Agentic coding SOP
 ├── src/
 │   ├── instruments/        # Pricing & YTM — COMPLETE
 │   │   ├── __init__.py
