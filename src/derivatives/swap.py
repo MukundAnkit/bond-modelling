@@ -20,7 +20,7 @@ def swap_rate(
     swap: InterestRateSwap,
     discount_curve: Callable[[float], float],
     forward_curve: Callable[[float], float] | None = None,
-):
+) -> float:
     """Calculate the par swap rate for given swap structure and continuous yield curves.
 
     In a multi-curve framework, the forward rate is determined by the forward_curve,
@@ -47,8 +47,8 @@ def swap_rate(
     dt = 1.0 / swap.freq
     periods = int(swap.tenor * swap.freq)
 
-    pv01 = 0.0
-    float_pv = 0.0
+    pv01: float | aad.Dual = 0.0
+    float_pv: float | aad.Dual = 0.0
 
     for i in range(1, periods + 1):
         t = i * dt
@@ -56,24 +56,21 @@ def swap_rate(
 
         # Discount factor Z(t) from discount_curve
         y_d = discount_curve(t)
-        z_d = aad.exp(-y_d * t)
+        z_d: float | aad.Dual = aad.exp(-y_d * t)
 
         pv01 += z_d * dt
 
         # Forward rate implied from forward_curve
         if i == 1:
-            z_f_prev = 1.0
+            z_f_prev: float | aad.Dual = 1.0
         else:
             y_f_prev = forward_curve(t_prev)
             z_f_prev = aad.exp(-y_f_prev * t_prev)
 
         y_f = forward_curve(t)
-        z_f = aad.exp(-y_f * t)
+        z_f: float | aad.Dual = aad.exp(-y_f * t)
 
-        if float(z_f) > 0:
-            fwd_rate = (z_f_prev / z_f - 1.0) / dt
-        else:
-            fwd_rate = 0.0
+        fwd_rate = (z_f_prev / z_f - 1.0) / dt if float(z_f) > 0 else 0.0
 
         float_pv += fwd_rate * dt * z_d
 
@@ -85,7 +82,7 @@ def swap_pv(
     discount_curve: Callable[[float], float],
     forward_curve: Callable[[float], float] | None = None,
     position: str = "receiver",
-):
+) -> float:
     """Calculate the Present Value (PV) of the Interest Rate Swap.
 
     Parameters
@@ -114,8 +111,8 @@ def swap_pv(
     dt = 1.0 / swap.freq
     periods = int(swap.tenor * swap.freq)
 
-    pv_fixed = 0.0
-    pv_floating = 0.0
+    pv_fixed: float | aad.Dual = 0.0
+    pv_floating: float | aad.Dual = 0.0
 
     for i in range(1, periods + 1):
         t = i * dt
@@ -123,28 +120,25 @@ def swap_pv(
 
         # Discount factor Z(t) from discount_curve
         y_d = discount_curve(t)
-        z_d = aad.exp(-y_d * t)
+        z_d: float | aad.Dual = aad.exp(-y_d * t)
 
         pv_fixed += swap.notional * swap.fixed_rate * dt * z_d
 
         # Forward rate implied from forward_curve
         if i == 1:
-            z_f_prev = 1.0
+            z_f_prev: float | aad.Dual = 1.0
         else:
             y_f_prev = forward_curve(t_prev)
             z_f_prev = aad.exp(-y_f_prev * t_prev)
 
         y_f = forward_curve(t)
-        z_f = aad.exp(-y_f * t)
+        z_f: float | aad.Dual = aad.exp(-y_f * t)
 
-        if float(z_f) > 0:
-            fwd_rate = (z_f_prev / z_f - 1.0) / dt
-        else:
-            fwd_rate = 0.0
+        fwd_rate = (z_f_prev / z_f - 1.0) / dt if float(z_f) > 0 else 0.0
 
         pv_floating += swap.notional * fwd_rate * dt * z_d
 
     if position == "receiver":
-        return pv_fixed - pv_floating
+        return float(pv_fixed - pv_floating)
     else:
-        return pv_floating - pv_fixed
+        return float(pv_floating - pv_fixed)

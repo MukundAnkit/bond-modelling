@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.credit.structural import MertonModel, MertonJumpDiffusionModel
+from src.credit.structural import MertonJumpDiffusionModel, MertonModel
 
 
 def test_merton_model_equity():
@@ -72,7 +72,6 @@ def test_merton_jump_diffusion_equity():
 
     base_model = MertonModel(V=100.0, D=80.0, T=1.0, r=0.05, sigma_V=0.20)
     base_equity = base_model.equity_value()
-    
+
     # Due to increased tail risk, equity (call option) is more valuable
     assert equity > base_equity
-

@@ -23,7 +23,10 @@ def calculate_scheduled_pmt(balance: float, rate: float, term: int) -> float:
 
 
 def project_cash_flows(
-    balance: float, wac: float, term: int, smm_vector_or_func: list[float] | np.ndarray | Callable[[int, float], float]
+    balance: float,
+    wac: float,
+    term: int,
+    smm_vector_or_func: list[float] | np.ndarray | Callable[[int, float], float],
 ) -> dict[str, np.ndarray]:
     """Project cash flows for a pass-through MBS."""
     monthly_rate = wac / 12.0
@@ -46,13 +49,17 @@ def project_cash_flows(
         sched_prin[t] = min(pmt - interest[t], balances[t])
 
         rem_balance = balances[t] - sched_prin[t]
-        
+
         if callable(smm_vector_or_func):
             pool_factor = balances[t] / balance if balance > 0 else 0.0
             smm = smm_vector_or_func(t, pool_factor)
         else:
-            smm = smm_vector_or_func[t] if t < len(smm_vector_or_func) else smm_vector_or_func[-1]
-            
+            smm = (
+                smm_vector_or_func[t]
+                if t < len(smm_vector_or_func)
+                else smm_vector_or_func[-1]
+            )
+
         prepayments[t] = min(rem_balance * smm, rem_balance)
 
         balances[t + 1] = balances[t] - sched_prin[t] - prepayments[t]

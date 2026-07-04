@@ -1,10 +1,12 @@
 import nbformat as nbf
-import os
+
 
 def create_swaps_notebook():
     nb = nbf.v4.new_notebook()
     nb.cells = [
-        nbf.v4.new_markdown_cell("# 08 - Swaps Verification\n\nThis notebook demonstrates the Multi-Curve Integration and AAD framework for Interest Rate Swaps."),
+        nbf.v4.new_markdown_cell(
+            "# 08 - Swaps Verification\n\nThis notebook demonstrates the Multi-Curve Integration and AAD framework for Interest Rate Swaps."
+        ),
         nbf.v4.new_code_cell("""import sys
 import os
 sys.path.append(os.path.abspath('..'))
@@ -41,15 +43,18 @@ pv_dual.backward()
 print(f"PV: {float(pv_dual):.2f}")
 print(f"DV01 w.r.t Discount Curve: {bump_d.adjoint:.2f}")
 print(f"DV01 w.r.t Forward Curve: {bump_f.adjoint:.2f}")
-""")
+"""),
     ]
     with open("notebooks/08-swaps-verification.ipynb", "w") as f:
         nbf.write(nb, f)
 
+
 def create_options_notebook():
     nb = nbf.v4.new_notebook()
     nb.cells = [
-        nbf.v4.new_markdown_cell("# 09 - Options Verification\n\nThis notebook demonstrates the Bachelier/SABR models and AAD Greeks for Swaptions & Caps/Floors."),
+        nbf.v4.new_markdown_cell(
+            "# 09 - Options Verification\n\nThis notebook demonstrates the Bachelier/SABR models and AAD Greeks for Swaptions & Caps/Floors."
+        ),
         nbf.v4.new_code_cell("""import sys
 import os
 sys.path.append(os.path.abspath('..'))
@@ -88,10 +93,11 @@ px.backward()
 print(f"Option Price: {float(px):.6f}")
 print(f"Delta: {fwd.adjoint:.6f}")
 print(f"Vega: {vol.adjoint:.6f}")
-""")
+"""),
     ]
     with open("notebooks/09-options-verification.ipynb", "w") as f:
         nbf.write(nb, f)
+
 
 if __name__ == "__main__":
     create_swaps_notebook()

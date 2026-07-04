@@ -135,4 +135,3 @@ def test_isda_cds_model():
     )
 
     assert implied_par == pytest.approx(quoted_par_spread, rel=1e-5)
-

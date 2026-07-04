@@ -1,16 +1,16 @@
 import numpy as np
 import pytest
 
+from src.models.calibration import calibrate_cir, calibrate_vasicek
+from src.models.monte_carlo import MonteCarloEngine
 from src.models.stochastic import (
-    VasicekModel,
     CIRModel,
     HullWhite1FModel,
     HullWhite2FModel,
     ShiftedCIRModel,
     ShiftedLognormalModel,
+    VasicekModel,
 )
-from src.models.calibration import calibrate_vasicek, calibrate_cir
-from src.models.monte_carlo import MonteCarloEngine
 
 
 def test_vasicek_zcb_pricing():
@@ -53,14 +53,14 @@ def test_hull_white_1f_zcb_pricing():
     # When theta is constant, HW1F simplifies to Vasicek with b = theta/a
     a = 0.1
     sigma = 0.01
-    theta_val = 0.005 # corresponds to b = 0.05
+    theta_val = 0.005  # corresponds to b = 0.05
     model = HullWhite1FModel(a=a, sigma=sigma, theta=lambda t: theta_val)
     assert model.zcb_price(0.05, 0.0, 0.0) == 1.0
-    
+
     price = model.zcb_price(0.05, 0.0, 1.0)
-    vasicek_model = VasicekModel(a=a, b=theta_val/a, sigma=sigma)
+    vasicek_model = VasicekModel(a=a, b=theta_val / a, sigma=sigma)
     expected_price = vasicek_model.zcb_price(0.05, 1.0)
-    
+
     assert price == pytest.approx(expected_price, rel=1e-3)
 
 
@@ -101,7 +101,7 @@ def test_shifted_cir_zcb_pricing():
     model = ShiftedCIRModel(a=0.1, b=0.05, sigma=0.01, shift=-0.02)
     assert model.zcb_price(0.05, 0.0) == 1.0
     price = model.zcb_price(0.05, 1.0)
-    
+
     cir_model = CIRModel(a=0.1, b=0.05, sigma=0.01)
     # The Shifted CIR price should match CIR price evaluated at (r_t - shift) * exp(-shift*tau)
     expected_price = cir_model.zcb_price(0.05 - (-0.02), 1.0) * np.exp(-(-0.02) * 1.0)
@@ -110,7 +110,7 @@ def test_shifted_cir_zcb_pricing():
 
 def test_shifted_cir_monte_carlo_convergence():
     model = ShiftedCIRModel(a=0.2, b=0.05, sigma=0.05, shift=-0.01)
-    r0 = 0.02 # equivalent to x0 = 0.03
+    r0 = 0.02  # equivalent to x0 = 0.03
     T = 2.0
 
     exact_price = model.zcb_price(r0, T)
@@ -123,7 +123,7 @@ def test_shifted_lognormal_monte_carlo():
     model = ShiftedLognormalModel(a=0.2, theta=0.01, sigma=0.1, shift=-0.02)
     r0 = 0.05
     T = 1.0
-    
+
     # Just verify the monte carlo runs without error, as analytical solution is not implemented.
     mc = MonteCarloEngine(model, n_paths=1000, n_steps=50, seed=42)
     mc_price = mc.price_zcb(r0, T)

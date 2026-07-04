@@ -4,10 +4,15 @@ from src.derivatives import aad
 
 
 def bachelier_formula(
-    fwd, strike, t_exp, vol, df, is_call: bool
-):
+    fwd: float | aad.Dual,
+    strike: float | aad.Dual,
+    t_exp: float | aad.Dual,
+    vol: float | aad.Dual,
+    df: float | aad.Dual,
+    is_call: bool,
+) -> float | aad.Dual:
     """Core Bachelier formula (Normal model).
-    
+
     Parameters
     ----------
     fwd : float or Dual
@@ -22,7 +27,7 @@ def bachelier_formula(
         Discount factor.
     is_call : bool
         True for call (e.g., caplet, payer swaption), False for put.
-        
+
     Returns
     -------
     float or Dual

@@ -13,7 +13,7 @@ def test_bachelier_formula():
     fwd = 0.05
     strike = 0.05
     t_exp = 2.0
-    vol = 0.0050 # 50 bps normal vol
+    vol = 0.0050  # 50 bps normal vol
     df = 0.90
 
     call_px = bachelier_formula(fwd, strike, t_exp, vol, df, is_call=True)
@@ -23,6 +23,7 @@ def test_bachelier_formula():
     assert float(call_px - put_px) == pytest.approx(df * (fwd - strike), abs=1e-6)
     assert float(call_px) > 0
     assert float(put_px) > 0
+
 
 def test_sabr_normal_vol():
     fwd = 0.05
@@ -34,6 +35,7 @@ def test_sabr_normal_vol():
 
     vol = sabr_normal_vol(fwd, strike, t_exp, alpha, rho, nu)
     assert vol > 0.0
+
 
 def test_bachelier_cap_floor_parity():
     notional = 1e6
@@ -55,6 +57,7 @@ def test_bachelier_cap_floor_parity():
     pv_swap = swap_pv(swap, curve, position="payer")
 
     assert float(pv_cap - pv_floor) == pytest.approx(float(pv_swap), rel=1e-3, abs=1e-2)
+
 
 def test_bachelier_swaption_parity():
     notional = 1e6
@@ -80,4 +83,6 @@ def test_bachelier_swaption_parity():
 
     pv_forward_swap = pv_payer_full - pv_payer_short
 
-    assert float(pv_payer - pv_receiver) == pytest.approx(float(pv_forward_swap), rel=1e-3, abs=1e-2)
+    assert float(pv_payer - pv_receiver) == pytest.approx(
+        float(pv_forward_swap), rel=1e-3, abs=1e-2
+    )

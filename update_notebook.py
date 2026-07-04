@@ -1,10 +1,12 @@
 import nbformat
 
-with open('notebooks/10-mbs-verification.ipynb', 'r') as f:
+with open("notebooks/10-mbs-verification.ipynb") as f:
     nb = nbformat.read(f, as_version=4)
 
 # 1. Richard-Roll Markdown
-md1 = nbformat.v4.new_markdown_cell(source="## Richard-Roll Prepayment Model\nDemonstrating the new stochastic/behavioral prepayment modeling.")
+md1 = nbformat.v4.new_markdown_cell(
+    source="## Richard-Roll Prepayment Model\nDemonstrating the new stochastic/behavioral prepayment modeling."
+)
 # 1. Richard-Roll Code
 code1_src = """import numpy as np
 import matplotlib.pyplot as plt
@@ -29,7 +31,9 @@ plt.show()
 code1 = nbformat.v4.new_code_cell(source=code1_src)
 
 # 2. Hull-White OAS Markdown
-md2 = nbformat.v4.new_markdown_cell(source="## Monte Carlo OAS using Hull-White\nPricing the prepayment option using stochastic generated paths.")
+md2 = nbformat.v4.new_markdown_cell(
+    source="## Monte Carlo OAS using Hull-White\nPricing the prepayment option using stochastic generated paths."
+)
 # 2. Hull-White OAS Code
 code2_src = """from src.mbs.oas import generate_hw1f_paths, calculate_oas, price_mbs
 from src.mbs.pass_through import project_cash_flows
@@ -75,5 +79,5 @@ code2 = nbformat.v4.new_code_cell(source=code2_src)
 
 nb.cells.extend([md1, code1, md2, code2])
 
-with open('notebooks/10-mbs-verification.ipynb', 'w') as f:
+with open("notebooks/10-mbs-verification.ipynb", "w") as f:
     nbformat.write(nb, f)

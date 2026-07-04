@@ -3,12 +3,12 @@
 from src.portfolio.portfolio import Portfolio
 from src.portfolio.position import Position
 from src.portfolio.var import (
-    historical_expected_shortfall,
-    historical_var,
+    cornish_fisher_expected_shortfall,
+    cornish_fisher_var,
     full_revaluation_pnl,
     full_revaluation_var,
-    cornish_fisher_var,
-    cornish_fisher_expected_shortfall,
+    historical_expected_shortfall,
+    historical_var,
     pot_expected_shortfall,
 )
 

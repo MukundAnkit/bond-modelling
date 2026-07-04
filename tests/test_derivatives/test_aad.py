@@ -11,7 +11,7 @@ def test_dual_number_basic():
     y = Dual(3.0)
 
     # z = x * y + x^2
-    z = x * y + x ** 2
+    z = x * y + x**2
 
     assert float(z) == 10.0
     z.backward()
@@ -20,6 +20,7 @@ def test_dual_number_basic():
     # dz/dy = x = 2
     assert x.adjoint == 7.0
     assert y.adjoint == 2.0
+
 
 def test_bachelier_aad_greeks():
     fwd = Dual(0.05)

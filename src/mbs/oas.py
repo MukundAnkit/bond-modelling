@@ -15,26 +15,28 @@ def generate_hw1f_paths(
     n_paths: int,
     term_months: int,
     dt: float = 1.0 / 12.0,
-    theta: float | np.ndarray = 0.05
+    theta: float | np.ndarray = 0.05,
 ) -> np.ndarray:
     """Generate interest rate paths using the Hull-White 1-factor model.
-    
+
     dr(t) = (theta(t) - a * r(t)) dt + sigma * dW(t)
     """
     paths = np.zeros((n_paths, term_months))
     paths[:, 0] = r0
-    
+
     if isinstance(theta, (int, float)):
         theta_arr = np.full(term_months, theta)
     else:
         theta_arr = theta
 
     Z = np.random.standard_normal((n_paths, term_months - 1))
-    
+
     for t in range(1, term_months):
-        dr = (theta_arr[t-1] - a * paths[:, t-1]) * dt + sigma * np.sqrt(dt) * Z[:, t-1]
-        paths[:, t] = paths[:, t-1] + dr
-        
+        dr = (theta_arr[t - 1] - a * paths[:, t - 1]) * dt + sigma * np.sqrt(dt) * Z[
+            :, t - 1
+        ]
+        paths[:, t] = paths[:, t - 1] + dr
+
     return paths
 
 
@@ -52,7 +54,9 @@ def calculate_oas(
     wac: float,
     term: int,
     rate_paths: np.ndarray,
-    prepayment_model: Callable[[np.ndarray, float], np.ndarray | Callable[[int, float], float]],
+    prepayment_model: Callable[
+        [np.ndarray, float], np.ndarray | Callable[[int, float], float]
+    ],
 ) -> float:
     """Calculate the Option-Adjusted Spread (OAS) for an MBS."""
     n_paths = rate_paths.shape[0]

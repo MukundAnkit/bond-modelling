@@ -29,12 +29,12 @@ def simulate_exposures(
     vm_paths = np.zeros_like(mtm_paths)
     if mpor_steps > 0:
         vm_paths[:, mpor_steps:] = mtm_paths[:, :-mpor_steps]
-        
+
     if im_paths is None:
         im_paths = np.zeros_like(mtm_paths)
-        
+
     net_mtm = mtm_paths - vm_paths
-    
+
     # Exposure is max(MtM - VM - IM, 0)
     positive_exposures = np.maximum(net_mtm - im_paths, 0)
     # Negative exposure is min(MtM - VM, 0)

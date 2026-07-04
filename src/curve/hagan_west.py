@@ -23,6 +23,7 @@ class MonotoneConvexSpline:
         discrete_forwards : np.ndarray
             1-D array of discrete forward rates F_i for the period [t_{i-1}, t_i].
             Length must be len(times) - 1.
+
         """
         self.t = np.asarray(times, dtype=np.float64)
         self.F = np.asarray(discrete_forwards, dtype=np.float64)
@@ -49,12 +50,14 @@ class MonotoneConvexSpline:
             return
 
         for i in range(1, self.n):
-            self.f[i] = (self.t[i] - self.t[i-1]) * self.F[i] + (self.t[i+1] - self.t[i]) * self.F[i-1]
-            self.f[i] /= (self.t[i+1] - self.t[i-1])
+            self.f[i] = (self.t[i] - self.t[i - 1]) * self.F[i] + (
+                self.t[i + 1] - self.t[i]
+            ) * self.F[i - 1]
+            self.f[i] /= self.t[i + 1] - self.t[i - 1]
 
         # Extrapolate boundaries
         self.f[0] = self.F[0] - (self.f[1] - self.F[0]) / 2.0
-        self.f[self.n] = self.F[-1] - (self.f[self.n-1] - self.F[-1]) / 2.0
+        self.f[self.n] = self.F[-1] - (self.f[self.n - 1] - self.F[-1]) / 2.0
 
         # Positivity preservation
         for i in range(self.n + 1):
@@ -74,15 +77,15 @@ class MonotoneConvexSpline:
                 res[j] = self.f[-1]
                 continue
 
-            idx = np.searchsorted(self.t, t_val, side='right') - 1
+            idx = np.searchsorted(self.t, t_val, side="right") - 1
             idx = min(idx, self.n - 1)
-            
+
             # Interpolation logic for interval [t_i, t_{i+1}]
             F_i = self.F[idx]
             f_L = self.f[idx]
-            f_R = self.f[idx+1]
+            f_R = self.f[idx + 1]
             t_L = self.t[idx]
-            t_R = self.t[idx+1]
+            t_R = self.t[idx + 1]
 
             x = (t_val - t_L) / (t_R - t_L)
 
@@ -90,14 +93,18 @@ class MonotoneConvexSpline:
             # Condition 1: f_L, f_R, F_i not well ordered
             if (f_L < F_i < f_R) or (f_L > F_i > f_R):
                 # well ordered
-                res[j] = (f_L - F_i) * (1 - 4*x + 3*x**2) + (f_R - F_i) * (-2*x + 3*x**2) + F_i
+                res[j] = (
+                    (f_L - F_i) * (1 - 4 * x + 3 * x**2)
+                    + (f_R - F_i) * (-2 * x + 3 * x**2)
+                    + F_i
+                )
             else:
                 # not well ordered, enforce monotonicity
                 if f_L == F_i and f_R == F_i:
                     res[j] = F_i
                 elif (f_L < F_i and f_R < F_i) or (f_L > F_i and f_R > F_i):
                     # enforce F_i locally
-                    res[j] = F_i # Simplification for extreme curvature
+                    res[j] = F_i  # Simplification for extreme curvature
                 else:
                     # Partial handling for other constraints
                     res[j] = F_i
@@ -111,7 +118,7 @@ class MonotoneConvexSpline:
         # Approximating the integral of f(s) ds using trapezoidal rule for simplicity
         t_arr = np.atleast_1d(t)
         res = np.zeros_like(t_arr, dtype=np.float64)
-        
+
         for j, t_val in enumerate(t_arr):
             if t_val == 0:
                 res[j] = 1.0

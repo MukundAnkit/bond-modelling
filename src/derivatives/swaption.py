@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 from scipy.optimize import root_scalar
 
@@ -106,7 +107,7 @@ def price_swaption_bachelier(
     discount_curve: Callable[[float], float],
     forward_curve: Callable[[float], float] | None = None,
     vol: float = 0.0,
-    sabr_params: dict | None = None,
+    sabr_params: dict[str, Any] | None = None,
 ) -> float:
     """Price a European Swaption using Bachelier and SABR models.
 
@@ -144,35 +145,33 @@ def price_swaption_bachelier(
         return 0.0
 
     # Calculate annuity A = sum(dt * Z_i_d)
-    annuity = 0.0
-    float_pv = 0.0
+    annuity: float | aad.Dual = 0.0
+    float_pv: float | aad.Dual = 0.0
 
     t_prev = swaption.expiry
     for ti in payment_times:
         yi_d = discount_curve(ti)
-        z_d = aad.exp(-yi_d * ti)
+        z_d: float | aad.Dual = aad.exp(-yi_d * ti)
         annuity += dt * z_d
 
         # Forward rate implied from forward_curve
         y_f_prev = forward_curve(t_prev)
-        z_f_prev = aad.exp(-y_f_prev * t_prev)
+        z_f_prev: float | aad.Dual = aad.exp(-y_f_prev * t_prev)
 
         y_f = forward_curve(ti)
-        z_f = aad.exp(-y_f * ti)
+        z_f: float | aad.Dual = aad.exp(-y_f * ti)
 
-        if float(z_f) > 0:
-            fwd_rate = (z_f_prev / z_f - 1.0) / dt
-        else:
-            fwd_rate = 0.0
+        fwd_rate = (z_f_prev / z_f - 1.0) / dt if float(z_f) > 0 else 0.0
 
         float_pv += fwd_rate * dt * z_d
         t_prev = ti
 
-    s_fwd = float_pv / annuity if annuity > 0 else 0.0
+    s_fwd = float_pv / annuity if float(annuity) > 0 else 0.0
 
     # Calculate implied volatility
     if sabr_params is not None:
         from src.derivatives.sabr import sabr_normal_vol
+
         implied_vol = sabr_normal_vol(
             fwd=s_fwd,
             strike=swaption.swap.fixed_rate,
@@ -198,4 +197,4 @@ def price_swaption_bachelier(
         is_call=is_call,
     )
 
-    return swaption.swap.notional * annuity * opt
+    return float(swaption.swap.notional * annuity * opt)

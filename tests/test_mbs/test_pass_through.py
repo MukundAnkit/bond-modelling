@@ -37,10 +37,10 @@ def test_project_cash_flows_callable_smm():
     balance = 100000
     wac = 0.06
     term = 36
-    
+
     def dynamic_smm(t, pool_factor):
         return 0.05 * pool_factor
-        
+
     cf = project_cash_flows(balance, wac, term, dynamic_smm)
     assert cf["balance"][-1] >= 0
     assert np.sum(cf["prepayment"]) > 0

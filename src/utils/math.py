@@ -136,7 +136,9 @@ def bisection(
 
     raise RuntimeError("Bisection did not converge")
 
+
 import numpy as np
+
 
 def jacobian_central_difference(
     func: Callable[[np.ndarray], np.ndarray], x: np.ndarray, eps: float = 1e-6
@@ -153,6 +155,7 @@ def jacobian_central_difference(
         J[:, i] = (func(x_plus) - func(x_minus)) / (2 * eps)
     return J
 
+
 def newton_raphson_multi(
     func: Callable[[np.ndarray], np.ndarray],
     guess: np.ndarray,
@@ -166,19 +169,19 @@ def newton_raphson_multi(
         f = func(x)
         if np.linalg.norm(f, ord=np.inf) < tol:
             return x
-        
+
         J = jac(x) if jac is not None else jacobian_central_difference(func, x)
-        
+
         try:
             dx = np.linalg.solve(J, -f)
         except np.linalg.LinAlgError:
             # Fallback to least squares if singular
             dx, _, _, _ = np.linalg.lstsq(J, -f, rcond=None)
-            
+
         x += dx
         if np.linalg.norm(dx, ord=np.inf) < 1e-12:
             break
-            
+
     if np.linalg.norm(func(x), ord=np.inf) >= tol:
         raise RuntimeError("Multivariate Newton-Raphson did not converge")
     return x

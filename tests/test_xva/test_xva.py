@@ -1,6 +1,12 @@
 # ruff: noqa
 import numpy as np
-from xva.xva import calculate_cva, calculate_dva, calculate_fva, calculate_cva_wwr, calculate_kva
+from xva.xva import (
+    calculate_cva,
+    calculate_dva,
+    calculate_fva,
+    calculate_cva_wwr,
+    calculate_kva,
+)
 
 
 def test_calculate_cva():
@@ -43,18 +49,14 @@ def test_calculate_fva():
 
 
 def test_calculate_cva_wwr():
-    exposure_paths = np.array([
-        [10.0, 20.0],
-        [20.0, 30.0],
-        [30.0, 10.0]
-    ])
+    exposure_paths = np.array([[10.0, 20.0], [20.0, 30.0], [30.0, 10.0]])
     pd_marginal = np.array([0.01, 0.02])
     lgd = 0.5
     df = np.array([1.0, 0.9])
-    
+
     cva_wwr = calculate_cva_wwr(exposure_paths, pd_marginal, lgd, df, 0.5)
     assert cva_wwr > 0
-    
+
     # With 0 correlation it should match normal CVA
     cva_no_wwr = calculate_cva_wwr(exposure_paths, pd_marginal, lgd, df, 0.0)
     cva_standard = calculate_cva(np.mean(exposure_paths, axis=0), pd_marginal, lgd, df)

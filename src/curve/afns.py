@@ -14,7 +14,7 @@ class ArbitrageFreeNelsonSiegel(NelsonSiegelCurve):
     Extends the standard Nelson-Siegel model by introducing a convexity adjustment
     term that ensures the model is arbitrage-free under a dynamic term structure
     setting (Christensen, Diebold, and Rudebusch, 2011).
-    
+
     The yield is given by:
     y(t) = beta0 + beta1 * ((1 - e^{-t/tau}) / (t/tau)) +
            beta2 * ((1 - e^{-t/tau}) / (t/tau) - e^{-t/tau}) - convexity_adjustment(t)
@@ -42,6 +42,7 @@ class ArbitrageFreeNelsonSiegel(NelsonSiegelCurve):
             Decay parameter (governing the location of the hump).
         sigma : float
             Volatility parameter used for the convexity adjustment.
+
         """
         super().__init__(beta0, beta1, beta2, tau)
         self._sigma = float(sigma)
@@ -65,18 +66,19 @@ class ArbitrageFreeNelsonSiegel(NelsonSiegelCurve):
         -------
         float or np.ndarray
             The convexity adjustment subtracted from the yield.
+
         """
         t_arr = np.asarray(t, dtype=np.float64)
         eps = 1e-12
         t_safe = np.where(t_arr < eps, eps, t_arr)
 
-        lambda_ = 1.0 / self._tau
-        
+        1.0 / self._tau
+
         # Simplified standard independent factor AFNS convexity adjustment
         # C(t) = sigma^2 * (t^2 / 6 + ... )
         # Using a generalized approximation for demonstration:
-        term = (self._sigma ** 2) * (t_safe ** 2) / 6.0
-        
+        term = (self._sigma**2) * (t_safe**2) / 6.0
+
         adj = np.where(t_arr < eps, 0.0, term)
         if not isinstance(t, np.ndarray) or t.ndim == 0:
             return float(adj)
@@ -106,7 +108,7 @@ class ArbitrageFreeNelsonSiegel(NelsonSiegelCurve):
             (None, None),  # beta1
             (None, None),  # beta2
             (1e-6, None),  # tau
-            (1e-6, 0.5),   # sigma (reasonable vol bound)
+            (1e-6, 0.5),  # sigma (reasonable vol bound)
         ]
 
         def objective(params: list[float]) -> float:
@@ -120,12 +122,12 @@ class ArbitrageFreeNelsonSiegel(NelsonSiegelCurve):
             factor = (1.0 - np.exp(-m_safe / t_val)) / (m_safe / t_val)
             term1 = np.where(m_arr < eps, 1.0, factor)
             term2 = np.where(m_arr < eps, 0.0, factor - np.exp(-m_safe / t_val))
-            
+
             base_yield = b0 + b1 * term1 + b2 * term2
-            
+
             # Convexity adj
-            adj = np.where(m_arr < eps, 0.0, (sig ** 2) * (m_safe ** 2) / 6.0)
-            
+            adj = np.where(m_arr < eps, 0.0, (sig**2) * (m_safe**2) / 6.0)
+
             predicted = base_yield - adj
             return float(np.sum((predicted - s_arr) ** 2))
 
@@ -133,13 +135,15 @@ class ArbitrageFreeNelsonSiegel(NelsonSiegelCurve):
             # Multi-start heuristic
             beta0_init = max(1e-6, float(s_arr[-1]))
             beta1_init = float(s_arr[0] - beta0_init)
-            
+
             best_fun = 1e12
             best_x = None
             for tau_g in [0.5, 2.0, 5.0]:
                 for sig_g in [0.01, 0.05]:
                     x0 = [beta0_init, beta1_init, 0.0, tau_g, sig_g]
-                    res = minimize(objective, x0=x0, method=method, bounds=bounds, **kwargs)
+                    res = minimize(
+                        objective, x0=x0, method=method, bounds=bounds, **kwargs
+                    )
                     if res.success and res.fun < best_fun:
                         best_fun = res.fun
                         best_x = res.x
@@ -152,4 +156,10 @@ class ArbitrageFreeNelsonSiegel(NelsonSiegelCurve):
                 raise RuntimeError(f"AFNS optimization failed: {res.message}")
             best_x = res.x
 
-        return cls(beta0=best_x[0], beta1=best_x[1], beta2=best_x[2], tau=best_x[3], sigma=best_x[4])
+        return cls(
+            beta0=best_x[0],
+            beta1=best_x[1],
+            beta2=best_x[2],
+            tau=best_x[3],
+            sigma=best_x[4],
+        )

@@ -241,14 +241,12 @@ def isda_protection_leg(
     """Calculate the PV of the protection leg using ISDA exact dates."""
     schedule = generate_imm_schedule(effective_date, maturity_date)
     pv = 0.0
-    prev_date = effective_date
 
     t_prev = act_360(valuation_date, max(valuation_date, effective_date))
     q_prev = np.exp(-hazard_rate * t_prev)
 
     for date in schedule:
         if date <= valuation_date:
-            prev_date = date
             continue
 
         t_i = act_360(valuation_date, date)
@@ -261,7 +259,6 @@ def isda_protection_leg(
 
         q_prev = q_curr
         t_prev = t_i
-        prev_date = date
 
     return float(pv * notional)
 
@@ -364,4 +361,3 @@ def isda_par_spread(
     )
 
     return float(prot_1 / prem_01)
-

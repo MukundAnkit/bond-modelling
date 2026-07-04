@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from scipy.stats import norm
@@ -118,7 +119,7 @@ def cap_floor_pv(instrument: Cap | Floor, model: VasicekModel, r_t: float) -> fl
     dt = 1.0 / instrument.freq
     periods = int(instrument.tenor * instrument.freq)
 
-    pv = 0.0
+    pv: float | aad.Dual = 0.0
 
     # Caplets/Floorlets: first period pays at T_2 based on rate set at T_1
     for i in range(1, periods + 1):
@@ -138,7 +139,7 @@ def cap_floor_pv(instrument: Cap | Floor, model: VasicekModel, r_t: float) -> fl
         else:
             raise TypeError("instrument must be Cap or Floor")
 
-    return pv
+    return float(pv)
 
 
 def cap_floor_bachelier(
@@ -146,7 +147,7 @@ def cap_floor_bachelier(
     discount_curve: Callable[[float], float],
     forward_curve: Callable[[float], float] | None = None,
     vol: float = 0.0,
-    sabr_params: dict | None = None,
+    sabr_params: dict[str, Any] | None = None,
 ) -> float:
     """Price a Cap or Floor using Bachelier and SABR models.
 
@@ -176,7 +177,7 @@ def cap_floor_bachelier(
     dt = 1.0 / instrument.freq
     periods = int(instrument.tenor * instrument.freq)
 
-    pv = 0.0
+    pv: float | aad.Dual = 0.0
 
     from src.derivatives.bachelier import bachelier_formula
 
@@ -199,7 +200,8 @@ def cap_floor_bachelier(
         # Calculate implied volatility
         if sabr_params is not None:
             from src.derivatives.sabr import sabr_normal_vol
-            implied_vol = sabr_normal_vol(
+
+            implied_vol: float | aad.Dual = sabr_normal_vol(
                 fwd=fwd,
                 strike=instrument.strike,
                 t_exp=T1,
@@ -221,4 +223,4 @@ def cap_floor_bachelier(
             is_call=is_cap,
         )
 
-    return pv
+    return float(pv)

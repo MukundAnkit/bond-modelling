@@ -1,6 +1,7 @@
-import typing
-from typing import Callable, Union
+from collections.abc import Callable
+
 import numpy as np  # noqa: D100
+
 from src.utils.stochastic import integrate_function
 
 
@@ -105,14 +106,14 @@ class HullWhite1FModel:
 
     def zcb_price(self, r_t: float, t: float, T: float) -> float:
         """Calculate the price of a Zero-Coupon Bond."""
-        if T == t:
+        if t == T:
             return 1.0
 
         a = self.a
         sigma = self.sigma
 
         def B(s: float, T_param: float) -> float:
-            return (1.0 - np.exp(-a * (T_param - s))) / a
+            return float((1.0 - np.exp(-a * (T_param - s))) / a)
 
         def integrand(s: float) -> float:
             BsT = B(s, T)
@@ -121,7 +122,7 @@ class HullWhite1FModel:
         ln_A = integrate_function(integrand, t, T)
         A = np.exp(ln_A)
 
-        return A * np.exp(-B(t, T) * r_t)
+        return float(A * np.exp(-B(t, T) * r_t))
 
 
 class HullWhite2FModel:
@@ -151,7 +152,7 @@ class HullWhite2FModel:
 
     def zcb_price(self, x_t: float, y_t: float, t: float, T: float) -> float:
         """Calculate the price of a Zero-Coupon Bond."""
-        if T == t:
+        if t == T:
             return 1.0
 
         a, b = self.a, self.b
@@ -175,7 +176,7 @@ class HullWhite2FModel:
 
         int_phi = integrate_function(self.phi, t, T)
 
-        return np.exp(-int_phi - Bx * x_t - By * y_t + 0.5 * V)
+        return float(np.exp(-int_phi - Bx * x_t - By * y_t + 0.5 * V))
 
 
 class ShiftedCIRModel:
@@ -193,13 +194,15 @@ class ShiftedCIRModel:
 
         if 2 * a * b <= sigma**2:
             import warnings
+
             warnings.warn(
-                "Feller condition (2ab > sigma^2) is not satisfied for the underlying CIR process."
+                "Feller condition (2ab > sigma^2) is not satisfied for the underlying CIR process.",
+                stacklevel=2,
             )
 
     def zcb_price(
-        self, r_t: Union[float, np.ndarray], tau: Union[float, np.ndarray]
-    ) -> Union[float, np.ndarray]:
+        self, r_t: float | np.ndarray, tau: float | np.ndarray
+    ) -> float | np.ndarray:
         """Calculate the price of a Zero-Coupon Bond."""
         a, b, sigma = self.a, self.b, self.sigma
         h = np.sqrt(a**2 + 2 * sigma**2)
@@ -215,7 +218,7 @@ class ShiftedCIRModel:
 
         x_t = r_t - self.shift
 
-        return A * np.exp(-B * x_t) * np.exp(-self.shift * tau)
+        return float(A * np.exp(-B * x_t) * np.exp(-self.shift * tau))
 
 
 class ShiftedLognormalModel:

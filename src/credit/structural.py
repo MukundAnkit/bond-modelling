@@ -184,16 +184,27 @@ class MertonJumpDiffusionModel(MertonModel):
 
         call_price = 0.0
         for n in range(n_terms):
-            prob = np.exp(-lambda_prime * self.T) * (lambda_prime * self.T)**n / math.factorial(n)
+            prob = (
+                np.exp(-lambda_prime * self.T)
+                * (lambda_prime * self.T) ** n
+                / math.factorial(n)
+            )
 
             sigma_n = np.sqrt(self.sigma_V**2 + n * self.sigma_j**2 / self.T)
-            r_n = self.r - self.lambda_j * k + n * (self.mu_j + 0.5 * self.sigma_j**2) / self.T
+            r_n = (
+                self.r
+                - self.lambda_j * k
+                + n * (self.mu_j + 0.5 * self.sigma_j**2) / self.T
+            )
 
-            d1 = (np.log(self.V / self.D) + (r_n + 0.5 * sigma_n**2) * self.T) / (sigma_n * np.sqrt(self.T))
+            d1 = (np.log(self.V / self.D) + (r_n + 0.5 * sigma_n**2) * self.T) / (
+                sigma_n * np.sqrt(self.T)
+            )
             d2 = d1 - sigma_n * np.sqrt(self.T)
 
-            bs_call = self.V * norm.cdf(d1) - self.D * np.exp(-r_n * self.T) * norm.cdf(d2)
+            bs_call = self.V * norm.cdf(d1) - self.D * np.exp(-r_n * self.T) * norm.cdf(
+                d2
+            )
             call_price += prob * bs_call
 
         return float(call_price)
-

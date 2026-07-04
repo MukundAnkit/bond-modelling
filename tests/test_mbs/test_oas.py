@@ -1,14 +1,13 @@
 import numpy as np
 
-from mbs.oas import calculate_oas, price_mbs, generate_hw1f_paths
+from mbs.oas import calculate_oas, generate_hw1f_paths, price_mbs
 from mbs.pass_through import project_cash_flows
 
 
 def test_generate_hw1f_paths():
-    paths = generate_hw1f_paths(0.05, 0.1, 0.01, 10, 120, 1.0/12.0, 0.05)
+    paths = generate_hw1f_paths(0.05, 0.1, 0.01, 10, 120, 1.0 / 12.0, 0.05)
     assert paths.shape == (10, 120)
     assert np.allclose(paths[:, 0], 0.05)
-
 
 
 def test_price_mbs():
