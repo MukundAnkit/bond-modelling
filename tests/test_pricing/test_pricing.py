@@ -53,3 +53,42 @@ def test_price_zero_coupon():
     p = price(b, 0.03)
     expected = 100 / (1.03**5)
     assert p == pytest.approx(expected, abs=1e-6)
+
+
+def test_zero_coupon_price_annual():
+    from src.instruments.pricing import zero_coupon_price
+
+    p = zero_coupon_price(100, 0.03, 5.0, compounding_freq=1)
+    expected = 100 / (1.03**5)
+    assert p == pytest.approx(expected, abs=1e-10)
+
+
+def test_zero_coupon_price_semi_annual():
+    from src.instruments.pricing import zero_coupon_price
+
+    p = zero_coupon_price(100, 0.03, 5.0, compounding_freq=2)
+    expected = 100 / (1.015**10)
+    assert p == pytest.approx(expected, abs=1e-10)
+
+
+def test_zero_coupon_price_default_freq():
+    from src.instruments.pricing import zero_coupon_price
+
+    p = zero_coupon_price(100, 0.03, 5.0)
+    expected = 100 / (1.015**10)
+    assert p == pytest.approx(expected, abs=1e-10)
+
+
+def test_zero_coupon_price_quarterly():
+    from src.instruments.pricing import zero_coupon_price
+
+    p = zero_coupon_price(100, 0.04, 3.0, compounding_freq=4)
+    expected = 100 / (1.01**12)
+    assert p == pytest.approx(expected, abs=1e-10)
+
+
+def test_zero_coupon_price_zero_yield():
+    from src.instruments.pricing import zero_coupon_price
+
+    p = zero_coupon_price(100, 0.0, 5.0)
+    assert p == pytest.approx(100.0, abs=1e-10)
