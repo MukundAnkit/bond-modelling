@@ -1,7 +1,6 @@
 # Bond Modelling
 
-Progressive fixed-income pricing and risk engine, built from the ground up across twelve modules:
-
+Progressive fixed-income pricing and risk engine, built from the ground up across 16 core modules and an advanced analytics engine:
 1. **Single Instrument Pricing** — Price & Yield-to-Maturity calculator
 2. **Risk Sensitivity** — Duration & Convexity
 3. **Discrete Term Structure** — Bootstrapping
@@ -76,7 +75,11 @@ src/
 
 ## Verification
 
-See `notebooks/01-single-instrument-pricing-verification.ipynb` for textbook cross-checks.
+All core modules are mathematically cross-checked against textbook examples via dedicated verification notebooks in the `notebooks/` directory.
+
+You can view the fully executed, consolidated output of all modules in:
+- `output/consolidated.html`
+- `output/consolidated.ipynb`
 
 ## License
 
