@@ -1,0 +1,5 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "customInstructions": "Before any task, read `.agents/AGENTS.md` — it contains mandatory project rules you must follow throughout this session.",
+  "agentRules": [".agents/AGENTS.md"]
+}

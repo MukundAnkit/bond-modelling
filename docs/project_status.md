@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-07-04
+> Last updated: 2026-07-05
 
 ---
 
@@ -33,11 +33,16 @@ bond_modelling/
 │   └── pull_request_template.md
 ├── docs/
 │   ├── archive/
-│   │   ├── project_plan.md              # MRD — archived (completed)
-│   │   └── fixed_income_analytics_roadmap.md  # Archived (completed)
-│   ├── project_status.md          # This file — current state
-│   ├── development_workflow.md    # Branching, commits, PR practices
-│   └── AGENTS.md                  # Agentic coding SOP
+│   │   ├── project_plan.md                    # MRD — archived (completed)
+│   │   ├── fixed_income_analytics_roadmap.md  # Archived (completed)
+│   │   ├── development_workflow.md            # Archived (merged into human_sop.md)
+│   │   └── AGENTS.md                          # Archived (migrated to .agents/)
+│   ├── human_sop.md                    # Human-facing developer SOP
+│   ├── project_status.md               # This file — current state
+│   └── project_plan.md                 # (symlink or copy — see archive)
+├── .agents/
+│   └── AGENTS.md                 # Agent rules (auto-loaded by opencode)
+├── opencode.json                 # opencode config — loads .agents/AGENTS.md
 ├── src/
 │   ├── instruments/        # Pricing & YTM — COMPLETE
 │   │   ├── __init__.py
