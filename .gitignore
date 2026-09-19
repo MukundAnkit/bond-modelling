@@ -24,3 +24,8 @@ htmlcov/
 
 # OS
 .DS_Store
+
+# Agentic coding config (kept local only)
+.agents/
+**/AGENTS.md
+opencode.json
