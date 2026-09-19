@@ -29,3 +29,4 @@ htmlcov/
 .agents/
 **/AGENTS.md
 opencode.json
+docs/human_sop.md

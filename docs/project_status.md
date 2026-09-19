@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-07-05
+> Last updated: 2026-09-20
 
 ---
 
@@ -8,8 +8,8 @@
 
 | Item | Detail |
 |---|---|
-| Python | 3.12.13 |
-| Package manager | uv 0.11.25 |
+| Python | 3.12.x |
+| Package manager | uv |
 | Virtual env | `.venv/` |
 | Core deps | numpy, scipy, pandas |
 | Dev deps | pytest, pytest-cov, ruff, mypy, jupyter, pandas-datareader, yfinance, requests |
@@ -20,7 +20,7 @@
 
 ```
 bond_modelling/
-├── pyproject.toml              # Project config & dependencies
+├── pyproject.toml              # Project config & dependencies (version 1.0.0)
 ├── .editorconfig               # Editor consistency rules
 ├── .gitignore
 ├── .python-version
@@ -29,108 +29,48 @@ bond_modelling/
 ├── uv.lock                     # Locked dependency tree
 ├── .github/
 │   ├── workflows/
-│   │   └── ci.yml              # GitHub Actions — auto-run tests on push/PR
+│   │   ├── ci.yml               # GitHub Actions — lint/typecheck/tests on push/PR
+│   │   └── release.yml          # GitHub Actions — tag-triggered release build + publish
 │   └── pull_request_template.md
 ├── docs/
-│   ├── archive/
-│   │   ├── project_plan.md                    # MRD — archived (completed)
-│   │   ├── fixed_income_analytics_roadmap.md  # Archived (completed)
-│   │   ├── development_workflow.md            # Archived (merged into human_sop.md)
-│   │   └── AGENTS.md                          # Archived (migrated to .agents/)
-│   ├── human_sop.md                    # Human-facing developer SOP
-│   ├── project_status.md               # This file — current state
-│   └── project_plan.md                 # (symlink or copy — see archive)
-├── .agents/
-│   └── AGENTS.md                 # Agent rules (auto-loaded by opencode)
-├── opencode.json                 # opencode config — loads .agents/AGENTS.md
+│   └── project_status.md        # This file — current state
 ├── src/
-│   ├── instruments/        # Pricing & YTM — COMPLETE
-│   │   ├── __init__.py
-│   │   ├── bond.py             #   Bond dataclass
-│   │   ├── pricing.py          #   Price calculator (PV of cash flows)
-│   │   └── ytm_solver.py       #   YTM solver (Newton + bisection)
-│   ├── risk/               # Risk & Sensitivity — COMPLETE
-│   │   ├── __init__.py
-│   │   ├── duration.py         #   Macaulay & Modified Duration
-│   │   ├── convexity.py        #   Convexity (second derivative)
-│   │   ├── shock.py            #   Taylor-series shock simulation
-│   │   ├── dollar_measures.py  #   Dollar Duration, DV01, Dollar Convexity
-│   │   ├── effective.py        #   Effective Duration & Convexity (yield-curve bumping)
-│   │   ├── key_rate_duration.py#   Key Rate Duration (non-parallel shifts)
-│   │   └── stress.py           #   Basel IRBB non-parallel stress scenarios
-│   ├── bootstrap/      # Bootstrapping — COMPLETE
-│   │   ├── __init__.py
-│   │   ├── bootstrap.py        #   Recursive spot-rate bootstrapping
-│   │   └── interpolate.py      #   Log-linear discount-factor interpolation
-│   ├── curve/          # Nelson-Siegel curve — COMPLETE
-│   ├── __init__.py
-│   └── nelson_siegel.py    #   Nelson-Siegel curve model & optimizer
-├── derivatives/    # Derivatives pricing — COMPLETE
-│   ├── __init__.py
-│   ├── black.py            #   Black (1976) model formulas
-│   ├── swap.py             #   Vanilla Interest Rate Swaps
-│   ├── cap_floor.py        #   Caps & Floors (Vasicek & Black)
-│   └── swaption.py         #   Swaptions (Jamshidian's Trick & Black)
-│   ├── data/                   # Data source fetchers — COMPLETE
-│   │   ├── __init__.py
-│   │   ├── base.py             #   Base fetcher interface
-│   │   ├── fred.py             #   FRED API (pandas_datareader)
-│   │   ├── treasury.py         #   US Treasury Fiscal Data
-│   │   ├── yfinance_fetcher.py #   Yahoo Finance
-│   │   ├── finra.py            #   FINRA Bond Center mock
-│   │   └── validation.py       #   Crossover yield curve validation helper
-│   ├── models/                 # Stochastic rate models — COMPLETE
-│   │   ├── __init__.py
-│   │   ├── stochastic.py       #   Vasicek and CIR analytical pricing
-│   │   ├── monte_carlo.py      #   Euler-Maruyama simulation engine
-│   │   └── calibration.py      #   Model calibration (OLS/MLE)
-│   ├── portfolio/      # Portfolio aggregation — COMPLETE
-│   │   ├── __init__.py
-│   │   ├── portfolio.py        #   Portfolio aggregate risk & Basel stress
-│   │   └── position.py         #   Bond holdings position class
-│   └── utils/                  # Shared helpers — plotting.py, cache.py added
+│   ├── instruments/             # Bond definitions, pricing, YTM solvers
+│   ├── risk/                    # Duration, convexity, dollar measures, stress
+│   ├── bootstrap/               # Discrete term-structure bootstrapping
+│   ├── curve/                   # Nelson-Siegel curve, PCA
+│   ├── derivatives/             # Swaps, caps/floors, swaptions (Vasicek & Black)
+│   ├── data/                    # FRED, Treasury, yfinance, FINRA fetchers + validation
+│   ├── models/                  # Vasicek/CIR, Monte Carlo simulation, calibration
+│   ├── portfolio/               # Positions, aggregation, portfolio stress
+│   ├── credit/                  # Hazard rates, Merton, single-name CDS
+│   ├── mbs/                     # Prepayment CPR/SMM, pass-throughs, OAS
+│   ├── trees/                   # Trinomial & Hull-White lattices
+│   ├── inflation/               # TIPS, real vs nominal curves
+│   ├── structured/              # Copulas, tranches, synthetic CDOs
+│   ├── exotics/                 # LMM, CMS, TARNs
+│   ├── xva/                     # Exposure simulation, CVA/DVA/FVA/KVA
+│   └── utils/                   # Plotting & caching helpers
 ├── tests/
-│   ├── __init__.py
-│   ├── test_pricing/   # Pricing tests — 16 passing
-│   │   ├── __init__.py
-│   │   ├── test_pricing.py     #   9 tests
-│   │   └── test_ytm_solver.py  #   7 tests
-│   ├── test_utils/     # Utils tests — 18 passing
-│   │   ├── __init__.py
-│   │   └── test_plotting.py    #  18 tests
-│   ├── test_risk/      # Risk tests — 62 passing
-│   │   ├── __init__.py
-│   │   ├── test_duration.py         #  14 tests
-│   │   ├── test_convexity.py        #   9 tests
-│   │   ├── test_shock.py            #   9 tests
-│   │   ├── test_dollar_measures.py  #   8 tests
-│   │   ├── test_effective.py        #   8 tests
-│   │   ├── test_key_rate_duration.py#   5 tests
-│   │   └── test_stress.py           #   9 tests
-│   ├── test_bootstrap/ # Bootstrap tests — 26 passing
-│   │   ├── __init__.py
-│   │   ├── test_bootstrap.py      #  18 tests
-│   │   └── test_interpolate.py    #   8 tests
-│   ├── test_data/      # Data tests — 3 passing
-│   │   └── test_validation.py     #   3 tests
-│   ├── test_nelsonsiegel/ # Nelson-Siegel tests — 8 passing
-│   │   ├── __init__.py
-│   │   └── test_nelson_siegel.py  #   8 tests
-│   ├── test_portfolio/ # Portfolio tests — 4 passing
-│   │   └── test_portfolio.py      #   4 tests
-│   └── test_utils/     # Utils tests — 21 passing
-│       ├── __init__.py
-│       ├── test_cache.py          #   3 tests
-│       └── test_plotting.py       #  18 tests
-└── notebooks/
-    ├── 01-single-instrument-pricing-verification.ipynb  # Textbook verification notebook
-    ├── 02-risk-sensitivity-verification.ipynb           # Duration & convexity notebook
-    ├── 03-bootstrapping-verification.ipynb               # Bootstrapping verification notebook
-    ├── 04-nelson-siegel-verification.ipynb              # Nelson-Siegel verification notebook
-    ├── 05-portfolio-caching-verification.ipynb          # Portfolio & Caching verification notebook
-    ├── 06-data-source-fetchers-exploration.ipynb        # Data Source fetchers notebook
-    ├── 07-stochastic-simulation-verification.ipynb      # PCA and Stochastic Monte Carlo notebook
-    └── 08-derivatives-pricing-verification.ipynb        # Derivatives Pricing (Vasicek & Black)
+│   ├── test_pricing/            # 51 tests
+│   ├── test_risk/               # 66 tests
+│   ├── test_bootstrap/          # 28 tests
+│   ├── test_curve/              # 11 tests
+│   ├── test_nelsonsiegel/       # 8 tests
+│   ├── test_portfolio/          # 11 tests
+│   ├── test_data/               # 15 tests
+│   ├── test_utils/              # 21 tests
+│   ├── test_models/             # 13 tests
+│   ├── test_derivatives/        # 11 tests
+│   ├── test_credit/             # 12 tests
+│   ├── test_mbs/                # 11 tests
+│   ├── test_trees/              # 6 tests
+│   ├── test_inflation/          # 9 tests
+│   ├── test_structured/         # 9 tests
+│   ├── test_exotics/            # 6 tests
+│   └── test_xva/                # 7 tests
+├── notebooks/                   # Module verification notebooks (01–16)
+└── output/                      # Consolidated executed outputs (html/ipynb)
 ```
 
 ---
@@ -140,13 +80,12 @@ bond_modelling/
 | Item | Detail |
 |---|---|
 | Remote | `https://github.com/MukundAnkit/bond-modelling.git` |
-| Branches | `main` (`v0.1.0`), `dev` (active) |
-| Workflow | Feature branches (`feat/*`) → PR → `dev` → release PR → `main` (tagged) |
+| Branches | `main` (releases, currently `v1.0.0`), `dev` (active integration) |
+| Workflow | Feature branches (`feat/*`) → PR → `dev` → PR → `main` (tagged) |
 | CI | GitHub Actions — runs `ruff check`, `ruff format --check`, `mypy src/`, `pytest` on push/PR to `dev` or `main` |
+| Release | Pushing a `v*` tag to `main` triggers `release.yml` (verify → `uv build` → GitHub Release with wheel/sdist + generated notes) |
 | PR template | Checklist with type tags + verification steps |
-| Workflow guide | See [`docs/development_workflow.md`](development_workflow.md) |
-| Latest release | [`v0.1.0`](https://github.com/MukundAnkit/bond-modelling/releases/tag/v0.1.0) — Module 1: Single Instrument Pricing |
-| Latest tag (unreleased) | `v0.11.0` — Module 12: Inflation-Linked Bonds (on `dev`) |
+| Latest release | [`v1.0.0`](https://github.com/MukundAnkit/bond-modelling/releases/tag/v1.0.0) — full 16-module engine |
 
 ---
 
@@ -157,21 +96,21 @@ bond_modelling/
 | Instruments (Pricing & YTM) | **Complete** | Bond dataclass, price(), YTM solver with Newton-Raphson + bisection fallback. Tolerance $10^{-6}$. |
 | Utils (Plotting) | **Complete** | `set_theme()`, `BOND_COLORS`, `FigureConfig`, `figure()`, `subplots()`, `finish_plot()`, `reference_line()`, `price_yield_curve()`. |
 | Risk (Sensitivity) | **Complete** | Macaulay/Modified Duration, Convexity, Taylor-series shock, Dollar Duration/DV01, Effective D/C, Key Rate Duration, Basel IRBB stress scenarios. |
-| Bootstrap (Term Structure) | **Complete** | Recursive bootstrapping (annual + semi-annual), log-linear discount-factor interpolation. 26 tests. |
+| Bootstrap (Term Structure) | **Complete** | Recursive bootstrapping (annual + semi-annual), log-linear discount-factor interpolation. 28 tests. |
 | Curve (Optimization) | **Complete** | Nelson-Siegel continuous parametric curve optimization via multi-start Nelder-Mead. 8 tests. |
-| Portfolio (Aggregation) | **Complete** | Position and Portfolio classes, MV-weighted duration/convexity, DV01, KRD vectors, and Basel stress testing. 4 tests. |
-| Caching & Validation | **Complete** | JSONCache with TTL validation, cross_validate_yields comparing FRED vs yfinance. 6 tests. |
-| Data Integrations | **Complete** | FredFetcher, TreasuryFetcher, YFinanceFetcher, and FINRA mocks. |
-| Stochastic Models | **Complete** | PCA curve extraction, Vasicek/CIR models, calibration, Monte Carlo paths. |
-| Derivatives | **Complete** | Vanilla Swaps, Caps, Floors, Swaptions using Vasicek analytical and Black (1976) models. |
-| Credit Risk & CDS | **Complete** | Hazard rate calibration, structural (Merton) models, and single-name CDS pricing. |
-| MBS & Prepayment | **Complete** | CPR/SMM prepayment modeling, pass-through cash flows, Option-Adjusted Spread (OAS). |
-| Advanced Trees | **Complete** | Trinomial trees, Hull-White lattice, Bermudan swaption pricing. |
-| Inflation Bonds | **Complete** | TIPS, real vs. nominal curves, and break-even inflation calculations. |
+| Portfolio (Aggregation) | **Complete** | Position and Portfolio classes, MV-weighted duration/convexity, DV01, KRD vectors, and Basel stress testing. 11 tests. |
+| Caching & Validation | **Complete** | JSONCache with TTL validation, cross_validate_yields comparing FRED vs yfinance. |
+| Data Integrations | **Complete** | FredFetcher, TreasuryFetcher, YFinanceFetcher, and FINRA mocks. 15 tests. |
+| Stochastic Models | **Complete** | PCA curve extraction, Vasicek/CIR models, calibration, Monte Carlo paths. 13 tests. |
+| Derivatives | **Complete** | Vanilla Swaps, Caps, Floors, Swaptions using Vasicek analytical and Black (1976) models. 11 tests. |
+| Credit Risk & CDS | **Complete** | Hazard rate calibration, structural (Merton) models, and single-name CDS pricing. 12 tests. |
+| MBS & Prepayment | **Complete** | CPR/SMM prepayment modeling, pass-through cash flows, Option-Adjusted Spread (OAS). 11 tests. |
+| Advanced Trees | **Complete** | Trinomial trees, Hull-White lattice, Bermudan swaption pricing. 6 tests. |
+| Inflation Bonds | **Complete** | TIPS, real vs. nominal curves, and break-even inflation calculations. 9 tests. |
 | Value at Risk (VaR) | **Complete** | Historical, Parametric, and Monte Carlo VaR & Expected Shortfall computation. |
-| Structured Products | **Complete** | Gaussian/Student-t Copulas, Tranche loss (Equity/Mezz/Senior), Synthetic CDO/CLO pricing. |
-| Interest Rate Exotics | **Complete** | LIBOR Market Model (LMM/BGM), Constant Maturity Swaps (CMS), Target Redemption Notes (TARNs). |
-| XVA & Counterparty Risk | **Complete** | EE/PFE exposure simulation, Credit Valuation Adjustment (CVA), Debt (DVA), and Funding (FVA). |
+| Structured Products | **Complete** | Gaussian/Student-t Copulas, Tranche loss (Equity/Mezz/Senior), Synthetic CDO/CLO pricing. 9 tests. |
+| Interest Rate Exotics | **Complete** | LIBOR Market Model (LMM/BGM), Constant Maturity Swaps (CMS), Target Redemption Notes (TARNs). 6 tests. |
+| XVA & Counterparty Risk | **Complete** | EE/PFE exposure simulation, Credit Valuation Adjustment (CVA), Debt (DVA), Funding (FVA), KVA. 7 tests. |
 
 ---
 
@@ -185,11 +124,12 @@ bond_modelling/
 ### `price()` (`src/instruments/pricing.py`)
 - Vectorized PV computation using numpy
 - Formula: $P = \sum_{t=1}^{T \times m} \frac{C/m}{(1 + y/m)^t} + \frac{F}{(1 + y/m)^{T \times m}}$
+- Also exposes `zero_coupon_price`, `accrued_interest`, `dirty_price`, `clean_price_from_dirty`
 
 ### YTM Solvers (`src/instruments/ytm_solver.py`)
 - **Newton-Raphson** (`ytm_newton`): Uses numerical derivative (central difference), default guess 5%, max 500 iterations
-- **Bisection** (`ytm_bisection`): Brackets between -5% and +50%, 500 max iterations
-- **Combined** (`ytm_solver`): Tries Newton first, falls back to bisection on failure
+- **Brent** (`ytm_brentq`) and **Bisection** (`ytm_bisection`): robust fallbacks bracketing between -5% and +50%
+- **Combined** (`ytm_solver`): Tries Brent first, then Newton, then bisection
 - Tolerance: $10^{-6}$
 
 ---
@@ -249,6 +189,9 @@ bond_modelling/
 - SSE calculation: `sse(maturities, spot_rates)`
 - Optimization: `fit(maturities, spot_rates)` runs multi-start Nelder-Mead on candidate $\tau$ initial values `[0.5, 1.0, 2.0, 5.0, 10.0]` to guarantee convergence, with bound enforcement ($\beta_0 \ge 10^{-6}$, $\tau \ge 10^{-6}$)
 
+### PCA (`src/curve/pca.py`)
+- Standardizes empirical yield curve panels and extracts Level, Slope, Curvature components
+
 ---
 
 ## Portfolio — Implementation Details
@@ -279,7 +222,7 @@ bond_modelling/
 
 ## Data Fetchers — Implementation Details
 
-### Data Fetching interfaces (`src/data/`)
+### Data fetching interfaces (`src/data/`)
 - `FredFetcher`: Retrieves treasury yields via `pandas_datareader`.
 - `YFinanceFetcher`: Retrieves sovereign benchmark rates via `yfinance`.
 - `TreasuryFetcher`: Uses US Treasury Fiscal API.
@@ -287,10 +230,6 @@ bond_modelling/
 ---
 
 ## Stochastic Models — Implementation Details
-
-### PCA Extraction (`src/curve/pca.py`)
-- Standardizes empirical yield curve panels (e.g., from FRED).
-- Extracts Level, Slope, and Curvature components.
 
 ### Vasicek & CIR (`src/models/stochastic.py`, `calibration.py`)
 - Implements closed-form zero-coupon bond pricing under affine term structure.
@@ -308,54 +247,70 @@ bond_modelling/
 
 ### `Cap` & `Floor` (`src/derivatives/cap_floor.py`)
 - Prices interest rate caps and floors across all individual caplets/floorlets.
-- Solved analytically under the Vasicek model via options on Zero-Coupon Bonds.
-- Solved via market-standard Black's 1976 model using `cap_floor_black`.
-- Put-Call Parity verified: Cap - Floor = Forward Payer Swap.
+- Solved analytically under the Vasicek model and under Black's 1976 model.
+- Put-Call Parity verified.
 
 ### `Swaption` (`src/derivatives/swaption.py`)
-- Represents European options to enter a swap at expiry.
-- Priced under the Vasicek model analytically utilizing **Jamshidian's Trick** (decomposing the swaption into a portfolio of ZCB options).
-- Priced under Black's 1976 model using the forward swap rate and annuity.
+- European options to enter a swap at expiry.
+- Priced under the Vasicek model via Jamshidian's Trick and under Black's 1976 model.
+
+---
+
+## Credit, MBS, Trees, Inflation, Structured, Exotics, XVA — Implementation Details
+
+### Credit (`src/credit/`)
+- Hazard-rate CDS pricing, structural (Merton) default models.
+
+### MBS (`src/mbs/`)
+- Prepayment modeling via CPR/SMM, pass-through cash flows, Option-Adjusted Spread (OAS).
+
+### Trees (`src/trees/`)
+- Trinomial and Hull-White lattices with binomial sanity checks; Bermudan swaption pricing.
+
+### Inflation (`src/inflation/`)
+- TIPS pricing, real vs nominal curve conversion, break-even inflation.
+
+### Structured (`src/structured/`)
+- Gaussian/Student-t copulas, tranche loss (Equity/Mezz/Senior), synthetic CDO/CLO pricing, floating-rate note (FRN) support.
+
+### Exotics (`src/exotics/`)
+- LIBOR Market Model (LMM/BGM), Constant Maturity Swap (CMS), Target Redemption Notes (TARNs).
+
+### XVA (`src/xva/`)
+- Exposure simulation (EE/PFE, optional margin), CVA/DVA/FVA/KVA with wrong-way risk support.
 
 ---
 
 ## Test Results
 
 ```
-140 passed in 1.94s
+295 passed in 3.13s
 ```
 
 | Test suite | Tests | Key coverage |
 |---|---|---|
-| `test_pricing` | 16 | Bond validation, pricing (par/premium/discount/zero), YTM solvers |
-| `test_data` | 3 | Crossover yield curve validation, decimal alignment, tolerance bounds |
+| `test_pricing` | 51 | Bond validation, pricing (par/premium/discount/zero), YTM solvers |
+| `test_risk` | 66 | Duration, convexity, shock, dollar measures, effective D/C, key rate duration, stress |
+| `test_bootstrap` | 28 | Annual/semi-annual bootstrapping, interpolation, error handling |
 | `test_utils` | 21 | Plotting configurations, price-yield curves, JSONCache get/set/TTL/clear |
-| `test_risk` | 62 | Duration, convexity, shock, dollar measures, effective D/C, key rate duration, stress |
-| `test_bootstrap` | 26 | Annual/semi-annual bootstrapping, interpolation, error handling |
-| `test_nelsonsiegel` | 8 | Evaluation (scalar/vector), limits at t=0, SSE, heuristic/parameter-recovery fit, bound enforcement |
-| `test_portfolio` | 4 | Position/portfolio MV, weighted duration, weighted convexity, aggregate DV01, KRD aggregation, stress PnL |
+| `test_data` | 15 | Crossover yield-curve validation, fetcher mocks |
+| `test_models` | 13 | Vasicek/CIR pricing, calibration, Monte Carlo simulation |
+| `test_credit` | 12 | Hazard rates, CDS, structural models |
+| `test_curve` | 11 | Curve evaluation & helpers |
+| `test_portfolio` | 11 | Position/portfolio MV, weighted duration, DV01, KRD, stress PnL |
+| `test_derivatives` | 11 | Swaps, caps/floors, swaptions (parity checks) |
+| `test_mbs` | 11 | Prepayment, pass-through cash flows, OAS |
+| `test_inflation` | 9 | TIPS pricing, real/nominal conversion |
+| `test_structured` | 9 | Copulas, tranches, CDO, FRN |
+| `test_nelsonsiegel` | 8 | Nelson-Siegel evaluation, fit, bound enforcement |
+| `test_xva` | 7 | Exposure simulation, CVA/DVA/FVA/KVA |
+| `test_trees` | 6 | Trinomial/Hull-White trees, Bermudan swaption |
+| `test_exotics` | 6 | LMM, CMS, TARNs |
 
 ---
 
-## Next Steps
+## Status
 
-Per the Execution Protocol in the MRD, development must proceed in order:
+All 16 core mathematical modules are implemented, verified against textbook examples in `notebooks/`, and shipped in **v1.0.0** (2026-09-19).
 
-1. ~~Instruments (Pricing & YTM — complete)~~
-2. ~~Risk (Sensitivity — complete)~~
-3. ~~Bootstrap (Term Structure — complete)~~
-4. ~~Curve (Continuous Optimization — complete)~~
-5. ~~Portfolio Analytics (Aggregation — complete)~~
-6. ~~Data Source Fetchers (FRED, yfinance — complete)~~
-7. ~~Stochastic Rate Models (PCA, Vasicek, CIR — complete)~~
-8. ~~Interest Rate Derivatives (Swaps, Caps/Floors, Swaptions — complete)~~
-9. ~~Credit Risk & CDS (Hazard rates, Merton — complete)~~
-10. ~~MBS & Prepayment (CPR, OAS — complete)~~
-11. ~~Advanced Term Structure & Trees (Trinomial, Hull-White — complete)~~
-12. ~~Inflation-Linked Bonds (TIPS — complete)~~
-13. ~~Value at Risk (VaR & ES — complete)~~
-14. ~~Structured Products (CDOs & Copulas — complete)~~
-15. ~~Advanced Interest Rate Exotics (LMM, CMS, TARNs — complete)~~
-16. ~~XVA & Counterparty Credit Risk (CVA, DVA, FVA — complete)~~
-
-Next Steps: Project Complete! All 16 core mathematical modules have been successfully implemented.
+Current build gates: `uv run ruff check .` → `uv run ruff format . --check` → `uv run mypy src/` → `uv run pytest` (295 passing).
